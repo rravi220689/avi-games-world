@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pilot Dossier | Cosmic Overdrive{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header-card {
+        background: linear-gradient(135deg, rgba(14, 20, 48, 0.9), rgba(6, 8, 20, 0.9)), 
+                    radial-gradient(circle at 10% 50%, rgba(0, 240, 255, 0.2) 0%, transparent 60%);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .pilot-avatar-box {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .avatar-icon-ring {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(0, 240, 255, 0.1);
+        border: 2px solid var(--cyan);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: var(--cyan);
+    }
+
+    .level-progress-bar {
+        background: rgba(255, 255, 255, 0.1);
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+        width: 250px;
+    }
+
+    .level-progress-fill {
+        background: linear-gradient(90deg, #00f0ff, #00ff88);
+        height: 100%;
+    }
+
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.2rem;
+        margin-top: 1.2rem;
+    }
+
+    .achievement-card {
+        background: var(--bg-card);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        padding: 1.2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        transition: all 0.2s;
+    }
+
+    .achievement-card.unlocked {
+        border-color: var(--amber);
+        background: rgba(255, 170, 0, 0.08);
+        box-shadow: 0 0 15px rgba(255, 170, 0, 0.15);
+    }
+
+    .achievement-card.locked {
+        opacity: 0.5;
+        filter: grayscale(0.8);
+    }
+
+    .ach-icon-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .ach-icon-unlocked { background: rgba(255, 170, 0, 0.2); color: var(--amber); border: 1px solid var(--amber); }
+    .ach-icon-locked { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Pilot Dossier Header -->
+<div class="profile-header-card">
+    <div class="pilot-avatar-box">
+        <div class="avatar-icon-ring">
+            <i class="fa-solid fa-helmet-safety"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.85rem; color: var(--cyan); letter-spacing: 2px; text-transform: uppercase;">
+                FEDERATION PILOT DOSSIER
+            </div>
+            <h1 style="font-size: 2.2rem; margin: 0.2rem 0;">{{ profile.display_name }}</h1>
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <span class="pilot-level">LEVEL {{ profile.level }}</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">{{ profile.experience }} Total XP</span>
+            </div>
+            <div class="level-progress-bar">
+                <div class="level-progress-fill" style="width: {% widthratio profile.experience 6000 100 %}%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="credits-badge" style="font-size: 1.2rem; padding: 0.6rem 1.4rem;">
+            <i class="fa-solid fa-coins"></i> {{ profile.credits }} CC
+        </div>
+    </div>
+</div>
+
+<!-- Career Lifetime Metrics -->
+<div class="career-strip">
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--cyan);">{{ stats.total }}</div>
+        <div class="stat-metric-label">Total Races</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--lime);">{{ stats.wins }}</div>
+        <div class="stat-metric-label">Victories (1st)</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--amber);">{{ stats.podiums }}</div>
+        <div class="stat-metric-label">Podiums</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--pink);">{{ stats.win_rate }}%</div>
+        <div class="stat-metric-label">Win Rate</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: #00ffff;">{{ stats.max_speed }} <span style="font-size: 1rem;">km/h</span></div>
+        <div class="stat-metric-label">Top Velocity</div>
+    </div>
+</div>
+
+<!-- Achievements Case -->
+<div class="cyber-card" style="margin-bottom: 2.5rem;">
+    <h2 style="font-size: 1.3rem;"><i class="fa-solid fa-medal" style="color: var(--amber);"></i> FEDERATION MEDALS &amp; ACHIEVEMENTS</h2>
+    <div class="achievements-grid">
+        {% for a in achievements_display %}
+            <div class="achievement-card {% if a.is_unlocked %}unlocked{% else %}locked{% endif %}">
+                <div class="ach-icon-circle {% if a.is_unlocked %}ach-icon-unlocked{% else %}ach-icon-locked{% endif %}">
+                    <i class="fa-solid {{ a.item.badge_icon }}"></i>
+                </div>
+                <div>
+                    <strong style="color: #fff; font-size: 1rem;">{{ a.item.title }}</strong>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0;">{{ a.item.description }}</p>
+                    <div style="font-size: 0.8rem; color: var(--amber);">
+                        {% if a.is_unlocked %}
+                            <i class="fa-solid fa-check"></i> Unlocked (+{{ a.item.reward_credits }} CC)
+                        {% else %}
+                            <i class="fa-solid fa-lock"></i> Locked (+{{ a.item.reward_credits }} CC)
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Recent Flight Logs -->
+<div class="cyber-card">
+    <h2 style="font-size: 1.3rem; margin-bottom: 1rem;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--cyan);"></i> RECENT FLIGHT LOGS</h2>
+    <div style="overflow-x: auto;">
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>CIRCUIT</th>
+                    <th>VESSEL</th>
+                    <th>FINISH</th>
+                    <th>TIME</th>
+                    <th>BEST LAP</th>
+                    <th>CREDITS WON</th>
+                    <th>TIMESTAMP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for race in history %}
+                    <tr>
+                        <td style="color: #fff;">{{ race.track.name }}</td>
+                        <td>{{ race.vehicle.name|default:"Aero Viper" }}</td>
+                        <td>
+                            {% if race.position == 1 %}
+                                <span style="color: var(--amber); font-weight: 800;"><i class="fa-solid fa-trophy"></i> 1st</span>
+                            {% elif race.position <= 3 %}
+                                <span style="color: var(--lime); font-weight: 700;">#{{ race.position }} Podium</span>
+                            {% else %}
+                                <span>#{{ race.position }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-family: var(--font-heading); color: #fff;">{{ race.total_time_formatted }}</td>
+                        <td style="font-family: var(--font-heading); color: var(--cyan);">{{ race.best_lap_formatted }}</td>
+                        <td style="color: var(--amber);">+{{ race.credits_earned }} CC</td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem;">{{ race.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">
+                            No race logs recorded yet. Launch a race to start your career!
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

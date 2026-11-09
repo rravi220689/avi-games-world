@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ track.name }} | Race Arena{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        overflow: hidden;
+    }
+
+    .main-content {
+        padding: 0;
+        max-width: 100%;
+        height: calc(100vh - 65px);
+        position: relative;
+    }
+
+    footer {
+        display: none;
+    }
+
+    #game-canvas-container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0; left: 0;
+        background: #020208;
+    }
+
+    /* HUD Overlay */
+    .hud-layer {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none;
+        z-index: 100;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .hud-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .hud-panel {
+        background: rgba(10, 14, 34, 0.75);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 0.8rem 1.4rem;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    }
+
+    .hud-pos-lap {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .hud-position-val {
+        font-family: var(--font-heading);
+        font-size: 2.8rem;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1;
+        text-shadow: var(--cyan-glow);
+    }
+
+    .hud-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .hud-time-val {
+        font-family: var(--font-heading);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--cyan);
+        letter-spacing: 2px;
+    }
+
+    /* Center Countdown & Notifications */
+    .hud-center {
+        text-align: center;
+        margin: auto;
+    }
+
+    #hud-countdown {
+        font-family: var(--font-heading);
+        font-size: 6rem;
+        font-weight: 900;
+        color: var(--cyan);
+        text-shadow: 0 0 30px var(--cyan), 0 0 60px var(--cyan);
+        display: none;
+    }
+
+    #hud-notification {
+        font-family: var(--font-heading);
+        font-size: 1.8rem;
+        color: var(--amber);
+        text-shadow: var(--amber-glow);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    /* HUD Bottom Elements */
+    .hud-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .hud-gauges {
+        width: 320px;
+    }
+
+    .hud-speedometer {
+        background: rgba(10, 14, 34, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem 1.4rem;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+    }
+
+    .speed-number {
+        font-family: var(--font-heading);
+        font-size: 3.2rem;
+        font-weight: 900;
+        color: #fff;
+        line-height: 1;
+        text-shadow: var(--cyan-glow);
+    }
+
+    .speed-unit {
+        font-family: var(--font-heading);
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+    }
+
+    .hud-bar-row {
+        margin-bottom: 0.5rem;
+    }
+
+    .hud-bar-track {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .hud-bar-fill-shield {
+        height: 100%;
+        background: linear-gradient(90deg, #00f0ff, #0088ff);
+        transition: width 0.15s ease;
+    }
+
+    .hud-bar-fill-boost {
+        height: 100%;
+        background: linear-gradient(90deg, #ff0077, #ffaa00);
+        transition: width 0.15s ease;
+    }
+
+    /* Minimap HUD */
+    .hud-minimap {
+        position: relative;
+        width: 170px;
+        height: 170px;
+        background: rgba(5, 7, 18, 0.85);
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        padding: 5px;
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+
+    #minimap-canvas {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+    }
+
+    /* Controls Cheat Bar */
+    .hud-controls-hint {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(6, 8, 20, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 0.4rem 1.2rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 1.2rem;
+    }
+
+    .hud-controls-hint kbd {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        padding: 1px 6px;
+        color: var(--cyan);
+        font-family: var(--font-heading);
+        font-size: 0.75rem;
+    }
+
+    /* On-Screen Action Controls - Visible & Clickable for all devices */
+    .touch-controls {
+        display: flex;
+        position: absolute;
+        bottom: 2rem;
+        left: 2rem;
+        right: 2rem;
+        pointer-events: auto;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .touch-btn {
+        width: 68px;
+        height: 68px;
+        background: rgba(14, 20, 48, 0.85);
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        color: #fff;
+        font-size: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        transition: transform 0.1s, background 0.15s, border-color 0.15s;
+    }
+
+    .touch-btn:hover {
+        border-color: var(--cyan);
+        box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .touch-btn:active {
+        background: var(--cyan);
+        color: #000;
+        transform: scale(0.92);
+        box-shadow: var(--cyan-glow);
+    }
+
+    .touch-btn-label {
+        font-family: var(--font-heading);
+        font-size: 0.65rem;
+        letter-spacing: 1px;
+        margin-top: 2px;
+    }
+
+        background: rgba(14, 20, 48, 0.8);
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        color: #fff;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+    }
+
+    .touch-btn:active {
+        background: var(--cyan);
+        color: #000;
+        box-shadow: var(--cyan-glow);
+    }
+
+    /* Modal Styling */
+    .modal-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .modal-stat-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        padding: 0.8rem;
+    }
+
+    .achievement-unlocked-card {
+        background: rgba(255, 170, 0, 0.15);
+        border: 1px solid var(--amber);
+        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        margin-top: 0.6rem;
+        text-align: left;
+        color: var(--amber);
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="game-canvas-container"></div>
+
+<!-- HUD Layer -->
+<div class="hud-layer">
+    <!-- Top HUD -->
+    <div class="hud-top">
+        <div class="hud-panel hud-pos-lap">
+            <div>
+                <div class="hud-label">POSITION</div>
+                <div id="hud-position" class="hud-position-val">1ST</div>
+            </div>
+            <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 1.2rem;">
+                <div class="hud-label">LAP</div>
+                <div id="hud-lap" style="font-family: var(--font-heading); font-size: 1.8rem; color: #fff;">1 / {{ track.laps }}</div>
+            </div>
+        </div>
+
+        <div class="hud-panel" style="text-align: right;">
+            <div class="hud-label">LAP TIME</div>
+            <div id="hud-lap-time" class="hud-time-val">00:00.000</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+                TOTAL: <span id="hud-total-time" style="color: #fff;">00:00.000</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Messages -->
+    <div class="hud-center">
+        <div id="hud-countdown">3</div>
+        <div id="hud-notification"></div>
+    </div>
+
+    <!-- Bottom HUD -->
+    <div class="hud-bottom">
+        <!-- Gauges -->
+        <div class="hud-gauges">
+            <div class="hud-speedometer">
+                <div>
+                    <div class="hud-label">VELOCITY</div>
+                    <div class="speed-number" id="hud-speed">0</div>
+                </div>
+                <div class="speed-unit">KM/H</div>
+            </div>
+
+            <!-- Shield Gauge -->
+            <div class="hud-bar-row">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 2px;">
+                    <span style="color: var(--cyan);"><i class="fa-solid fa-shield-halved"></i> DEFLECTOR SHIELD</span>
+                </div>
+                <div class="hud-bar-track">
+                    <div id="hud-shield-fill" class="hud-bar-fill-shield" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Boost Gauge -->
+            <div class="hud-bar-row">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 2px;">
+                    <span style="color: var(--pink);"><i class="fa-solid fa-fire"></i> WARP NITRO [SHIFT]</span>
+                </div>
+                <div class="hud-bar-track">
+                    <div id="hud-boost-fill" class="hud-bar-fill-boost" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Hint -->
+        <div class="hud-controls-hint">
+            <span><kbd>W</kbd><kbd>S</kbd> Throttle / Brake</span>
+            <span><kbd>A</kbd><kbd>D</kbd> Steer</span>
+            <span><kbd>SPACE</kbd> Space Drift</span>
+            <span><kbd>SHIFT</kbd> Nitro</span>
+            <span><kbd>C</kbd> Camera</span>
+            <span><kbd>R</kbd> Reset</span>
+        </div>
+
+        <!-- Minimap Radar -->
+        <div class="hud-minimap">
+            <canvas id="minimap-canvas" width="160" height="160"></canvas>
+        </div>
+    </div>
+
+    <!-- Interactive Action Controls -->
+    <div class="touch-controls">
+        <div style="display: flex; gap: 1rem;">
+            <button id="btn-touch-left" class="touch-btn" title="Steer Left">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="touch-btn-label">LEFT</span>
+            </button>
+            <button id="btn-touch-right" class="touch-btn" title="Steer Right">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span class="touch-btn-label">RIGHT</span>
+            </button>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button id="btn-touch-boost" class="touch-btn" style="border-color: var(--pink); color: var(--pink);" title="Warp Nitro">
+                <i class="fa-solid fa-bolt"></i>
+                <span class="touch-btn-label">NITRO</span>
+            </button>
+            <button id="btn-touch-brake" class="touch-btn" title="Brake">
+                <i class="fa-solid fa-arrow-down"></i>
+                <span class="touch-btn-label">BRAKE</span>
+            </button>
+            <button id="btn-touch-accel" class="touch-btn" style="border-color: var(--lime); color: var(--lime);" title="Accelerate">
+                <i class="fa-solid fa-arrow-up"></i>
+                <span class="touch-btn-label">BOOST</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Victory / Finish Modal -->
+<div id="victory-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 id="modal-title" style="font-size: 2.2rem; color: #fff; margin-bottom: 0.5rem;">PODIUM FINISH!</h2>
+        <div id="modal-position" style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--amber); letter-spacing: 2px;">
+            1ST PLACE
+        </div>
+
+        <div class="modal-stats-grid">
+            <div class="modal-stat-box">
+                <div class="hud-label">TOTAL TIME</div>
+                <div id="modal-time" style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff;">00:00.000</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">BEST LAP</div>
+                <div id="modal-best-lap" style="font-family: var(--font-heading); font-size: 1.4rem; color: var(--cyan);">00:00.000</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">CREDITS BOUNTY</div>
+                <div id="modal-credits" style="font-family: var(--font-heading); font-size: 1.4rem; color: var(--amber);">+0</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">PILOT XP</div>
+                <div id="modal-xp" style="font-family: var(--font-heading); font-size: 1.4rem; color: var(--lime);">+0 XP</div>
+            </div>
+        </div>
+
+        <div id="modal-achievements"></div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.location.reload();" class="btn btn-outline">
+                <i class="fa-solid fa-rotate-right"></i> REMATCH
+            </button>
+            <a href="{% url 'tracks_list' %}" class="btn btn-primary">
+                <i class="fa-solid fa-flag-checkered"></i> NEXT CIRCUIT
+            </a>
+            <a href="{% url 'hangar' %}" class="btn btn-secondary">
+                <i class="fa-solid fa-wrench"></i> HANGAR
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/game_engine.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const raceConfig = JSON.parse('{{ race_config_json|escapejs }}');
+        // Initialize Game Engine
+        window.game = new SpaceRaceGame('game-canvas-container', raceConfig);
+    });
+</script>
+{% endblock %}

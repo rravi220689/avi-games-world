@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Circuits | Cosmic Overdrive{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tracks-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .track-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .track-card:hover {
+        border-color: var(--cyan);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 240, 255, 0.25);
+    }
+
+    .track-header-art {
+        height: 140px;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 1.2rem;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .art-earth_orbit {
+        background: linear-gradient(180deg, rgba(3, 6, 23, 0.2), rgba(3, 6, 23, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #0099ff 0%, #030617 70%);
+    }
+
+    .art-asteroid_belt {
+        background: linear-gradient(180deg, rgba(17, 6, 3, 0.2), rgba(17, 6, 3, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #ff6600 0%, #110603 70%);
+    }
+
+    .art-deep_nebula {
+        background: linear-gradient(180deg, rgba(12, 3, 28, 0.2), rgba(12, 3, 28, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #d500f9 0%, #0c031c 70%);
+    }
+
+    .art-black_hole {
+        background: linear-gradient(180deg, rgba(2, 0, 5, 0.2), rgba(2, 0, 5, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #ffd600 0%, #020005 70%);
+    }
+
+    .track-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .track-specs-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 1.2rem 0;
+        padding: 0.8rem;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+
+    .record-box {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <div>
+        <h1 style="font-size: 2rem;"><i class="fa-solid fa-flag-checkered" style="color: var(--cyan);"></i> INTERSTELLAR CIRCUITS</h1>
+        <p style="color: var(--text-muted);">Select your proving ground. Higher difficulty circuits yield exponential credit &amp; XP bounties.</p>
+    </div>
+</div>
+
+<div class="tracks-grid">
+    {% for item in tracks_data %}
+        {% with track=item.track best=item.best_record my_best=item.my_best %}
+            <div class="track-card">
+                <div class="track-header-art art-{{ track.theme }}">
+                    <div>
+                        <span class="badge-diff diff-{{ track.difficulty }}">{{ track.difficulty }}</span>
+                        <h2 style="font-size: 1.4rem; color: #fff; margin-top: 0.4rem;">{{ track.name }}</h2>
+                    </div>
+                </div>
+
+                <div class="track-body">
+                    <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; flex: 1;">
+                        {{ track.description }}
+                    </p>
+
+                    <div class="track-specs-row">
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Distance</div>
+                            <strong>{{ track.length_km }} km</strong>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Laps</div>
+                            <strong>{{ track.laps }} Laps</strong>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">1st Place Prize</div>
+                            <strong style="color: var(--amber);"><i class="fa-solid fa-coins"></i> {{ track.first_place_reward }} CC</strong>
+                        </div>
+                    </div>
+
+                    <div class="record-box">
+                        {% if best %}
+                            <div><i class="fa-solid fa-trophy" style="color: var(--amber);"></i> Sector Record: <strong>{{ best.total_time_formatted }}</strong> ({{ best.profile.display_name }})</div>
+                        {% endif %}
+                        {% if my_best %}
+                            <div style="color: var(--lime); margin-top: 0.2rem;"><i class="fa-solid fa-user-check"></i> Personal Best: <strong>{{ my_best.total_time_formatted }}</strong></div>
+                        {% else %}
+                            <div style="color: var(--text-muted); margin-top: 0.2rem;"><i class="fa-regular fa-clock"></i> No lap recorded yet</div>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'race_arena' track.slug %}" class="btn btn-primary" style="width: 100%;">
+                        <i class="fa-solid fa-play"></i> LAUNCH RACE
+                    </a>
+                </div>
+            </div>
+        {% endwith %}
+    {% endfor %}
+</div>
+{% endblock %}

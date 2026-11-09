@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}HQ | Cosmic Overdrive{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-banner {
+        background: linear-gradient(135deg, rgba(8, 12, 32, 0.9), rgba(16, 24, 60, 0.75)), 
+                    radial-gradient(circle at 80% 20%, rgba(0, 240, 255, 0.25) 0%, transparent 50%);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 3rem 2.5rem;
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-banner::after {
+        content: "";
+        position: absolute;
+        right: -50px;
+        bottom: -50px;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(circle, rgba(0, 240, 255, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero-tag {
+        font-family: var(--font-heading);
+        color: var(--cyan);
+        font-size: 0.85rem;
+        letter-spacing: 3px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .hero-title {
+        font-size: 2.8rem;
+        font-weight: 900;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+        background: linear-gradient(90deg, #ffffff 40%, #00f0ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+        color: var(--text-muted);
+        font-size: 1.15rem;
+        max-width: 650px;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .grid-2col {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .grid-2col {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .career-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-metric-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.2rem;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+
+    .stat-metric-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--cyan);
+    }
+
+    .stat-metric-val {
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 0.2rem;
+    }
+
+    .stat-metric-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .track-quick-card {
+        background: rgba(11, 16, 40, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+    }
+
+    .track-quick-card:hover {
+        background: rgba(18, 25, 62, 0.8);
+        border-color: var(--cyan);
+        transform: translateX(4px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-banner">
+    <div class="hero-tag">
+        <i class="fa-solid fa-atom"></i> INTERGALACTIC FORMULA ZERO GP
+    </div>
+    <h1 class="hero-title">CONQUER THE COSMIC HIGHWAYS</h1>
+    <p class="hero-desc">
+        Take control of state-of-the-art anti-gravity racing machines. Warp through Earth orbit, slalom through the Jovian asteroid belt, and defy supermassive black holes at supersonic speeds.
+    </p>
+    <div class="hero-actions">
+        {% if featured_tracks %}
+            <a href="{% url 'race_arena' featured_tracks.0.slug %}" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-play"></i> LAUNCH QUICK RACE
+            </a>
+        {% endif %}
+        <a href="{% url 'hangar' %}" class="btn btn-secondary btn-lg">
+            <i class="fa-solid fa-rocket"></i> ENTER HANGAR
+        </a>
+        <a href="{% url 'tracks_list' %}" class="btn btn-outline btn-lg">
+            <i class="fa-solid fa-compass"></i> SELECT CIRCUIT
+        </a>
+    </div>
+</div>
+
+<!-- Career Stats Strip -->
+<div class="career-strip">
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--cyan);">{{ stats.total_races }}</div>
+        <div class="stat-metric-label">Races Started</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--lime);">{{ stats.first_places }}</div>
+        <div class="stat-metric-label">Victories (1st)</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--amber);">{{ stats.podiums }}</div>
+        <div class="stat-metric-label">Podium Finishes</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: var(--pink);">{{ stats.win_rate }}%</div>
+        <div class="stat-metric-label">Win Rate</div>
+    </div>
+    <div class="stat-metric-card">
+        <div class="stat-metric-val" style="color: #bc13fe;">{{ stats.achievements_count }}</div>
+        <div class="stat-metric-label">Medals Earned</div>
+    </div>
+</div>
+
+<!-- 2-Column Dashboard: Equipped Vessel vs Featured Circuits -->
+<div class="grid-2col">
+    <!-- Equipped Vessel Showcase -->
+    <div class="cyber-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+            <h2 style="font-size: 1.3rem;"><i class="fa-solid fa-jet-fighter-up" style="color: var(--cyan);"></i> ACTIVE RACER</h2>
+            <span class="badge-diff diff-EASY">TIER {{ equipped_vehicle.vehicle.tier }}</span>
+        </div>
+
+        {% if equipped_vehicle %}
+            <div style="text-align: center; margin: 1.5rem 0;">
+                <h3 style="font-size: 1.8rem; color: #fff; margin-bottom: 0.3rem;">{{ equipped_vehicle.vehicle.name }}</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">{{ equipped_vehicle.vehicle.tagline }}</p>
+            </div>
+
+            <!-- Stats Meters -->
+            <div class="stat-bar-container">
+                <div class="stat-label-row">
+                    <span><i class="fa-solid fa-gauge-high"></i> Top Speed</span>
+                    <strong>{{ equipped_vehicle.effective_top_speed }} km/h</strong>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill fill-speed" style="width: {% widthratio equipped_vehicle.effective_top_speed 400 100 %}%;"></div>
+                </div>
+            </div>
+
+            <div class="stat-bar-container">
+                <div class="stat-label-row">
+                    <span><i class="fa-solid fa-bolt"></i> Acceleration</span>
+                    <strong>{{ equipped_vehicle.effective_acceleration }} G</strong>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill fill-accel" style="width: {% widthratio equipped_vehicle.effective_acceleration 12 100 %}%;"></div>
+                </div>
+            </div>
+
+            <div class="stat-bar-container">
+                <div class="stat-label-row">
+                    <span><i class="fa-solid fa-arrows-split-up-and-left"></i> Handling</span>
+                    <strong>{{ equipped_vehicle.effective_handling }}</strong>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill fill-handling" style="width: {% widthratio equipped_vehicle.effective_handling 12 100 %}%;"></div>
+                </div>
+            </div>
+
+            <div class="stat-bar-container">
+                <div class="stat-label-row">
+                    <span><i class="fa-solid fa-shield-halved"></i> Hull Deflector</span>
+                    <strong>{{ equipped_vehicle.effective_shield }} MW</strong>
+                </div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill fill-shield" style="width: {% widthratio equipped_vehicle.effective_shield 200 100 %}%;"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.8rem; display: flex; gap: 1rem;">
+                <a href="{% url 'hangar' %}" class="btn btn-primary" style="flex: 1;">
+                    <i class="fa-solid fa-wrench"></i> UPGRADE & TUNE
+                </a>
+            </div>
+        {% else %}
+            <p>No racer equipped. Head to the Hangar to choose your craft!</p>
+            <a href="{% url 'hangar' %}" class="btn btn-primary" style="margin-top: 1rem;">Visit Hangar</a>
+        {% endif %}
+    </div>
+
+    <!-- Cosmic Circuits Quick Launch -->
+    <div class="cyber-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+            <h2 style="font-size: 1.3rem;"><i class="fa-solid fa-satellite" style="color: var(--cyan);"></i> SECTOR CIRCUITS</h2>
+            <a href="{% url 'tracks_list' %}" style="font-size: 0.85rem; font-family: var(--font-heading);">VIEW ALL <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        {% for track in featured_tracks %}
+            <div class="track-quick-card">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem;">
+                        <h4 style="font-size: 1.1rem; color: #fff;">{{ track.name }}</h4>
+                        <span class="badge-diff diff-{{ track.difficulty }}">{{ track.difficulty }}</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        <span><i class="fa-solid fa-road"></i> {{ track.length_km }} km</span> &bull; 
+                        <span><i class="fa-solid fa-rotate-right"></i> {{ track.laps }} Laps</span> &bull;
+                        <span style="color: var(--amber);"><i class="fa-solid fa-coins"></i> {{ track.first_place_reward }} CC</span>
+                    </div>
+                </div>
+
+                <a href="{% url 'race_arena' track.slug %}" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-play"></i> RACE
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pilot Login | Cosmic Overdrive{% endblock %}
+
+{% block content %}
+<div style="max-width: 440px; margin: 3rem auto;">
+    <div class="cyber-card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fa-solid fa-shuttle-space" style="font-size: 3rem; color: var(--cyan); filter: drop-shadow(0 0 10px var(--cyan));"></i>
+            <h1 style="font-size: 1.8rem; margin-top: 1rem;">PILOT VERIFICATION</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Authenticate your flight credentials to sync progress.</p>
+        </div>
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">
+                    Pilot Callsign / Username:
+                </label>
+                <input type="text" name="username" required
+                       style="width: 100%; padding: 0.8rem; background: rgba(5,7,18,0.8); border: 1px solid var(--border-color); border-radius: 4px; color: #fff; font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.8rem;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">
+                    Security Keycode / Password:
+                </label>
+                <input type="password" name="password" required
+                       style="width: 100%; padding: 0.8rem; background: rgba(5,7,18,0.8); border: 1px solid var(--border-color); border-radius: 4px; color: #fff; font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-key"></i> ENGAGE AUTHENTICATION
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+            New Cadet in this Sector? <a href="{% url 'register' %}" style="color: var(--cyan);">Enlist Pilot Account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

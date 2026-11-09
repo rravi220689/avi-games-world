@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cosmic Overdrive | 3D Space Car Racing{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js (Local for offline & high performance) -->
+    <script src="{% static 'js/three.min.js' %}"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/game.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="nav-brand">
+            <i class="fa-solid fa-shuttle-space brand-icon"></i>
+            COSMIC<span class="highlight">OVERDRIVE</span>
+        </a>
+
+        <ul class="nav-menu">
+            <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> HQ</a></li>
+            <li><a href="{% url 'tracks_list' %}" class="nav-link {% if request.resolver_match.url_name == 'tracks_list' %}active{% endif %}"><i class="fa-solid fa-flag-checkered"></i> Circuits</a></li>
+            <li><a href="{% url 'hangar' %}" class="nav-link {% if request.resolver_match.url_name == 'hangar' %}active{% endif %}"><i class="fa-solid fa-wrench"></i> Hangar</a></li>
+            <li><a href="{% url 'leaderboards' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboards' %}active{% endif %}"><i class="fa-solid fa-trophy"></i> Rankings</a></li>
+            <li><a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><i class="fa-solid fa-id-card"></i> Dossier</a></li>
+        </ul>
+
+        <div class="nav-status">
+            <!-- Audio Toggles -->
+            <button id="global-sound-btn" class="audio-btn" title="Toggle Sound FX">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <button id="global-music-btn" class="audio-btn" title="Toggle Synthwave Music">
+                <i class="fa-solid fa-music"></i>
+            </button>
+
+            <!-- Cosmic Credits -->
+            <div class="credits-badge" title="Cosmic Credits">
+                <i class="fa-solid fa-coins"></i>
+                <span id="nav-credits-amount">{{ player_profile.credits|default:"1,500" }}</span> CC
+            </div>
+
+            <!-- Pilot Status -->
+            <a href="{% url 'profile' %}" class="pilot-badge">
+                <span class="pilot-level">LVL {{ player_profile.level|default:"1" }}</span>
+                <span>{{ player_profile.display_name }}</span>
+            </a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="btn btn-outline btn-sm" title="Logout"><i class="fa-solid fa-power-off"></i></a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-right-to-bracket"></i> Sync</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Page Content -->
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Footer -->
+    <footer>
+        <p>&copy; 2026 Cosmic Overdrive: Anti-Gravity Space GP | Built with Python Django &amp; Three.js</p>
+    </footer>
+
+    <!-- Web Audio Engine Script -->
+    <script src="{% static 'js/audio_synth.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const soundBtn = document.getElementById('global-sound-btn');
+            const musicBtn = document.getElementById('global-music-btn');
+
+            if (soundBtn && window.cosmicAudio) {
+                const updateSoundIcon = () => {
+                    soundBtn.innerHTML = window.cosmicAudio.enabled ? 
+                        '<i class="fa-solid fa-volume-high"></i>' : 
+                        '<i class="fa-solid fa-volume-xmark" style="color:#ff0077;"></i>';
+                };
+                updateSoundIcon();
+                soundBtn.addEventListener('click', () => {
+                    window.cosmicAudio.init();
+                    window.cosmicAudio.toggleSound();
+                    updateSoundIcon();
+                });
+            }
+
+            if (musicBtn && window.cosmicAudio) {
+                const updateMusicIcon = () => {
+                    musicBtn.innerHTML = window.cosmicAudio.musicEnabled ? 
+                        '<i class="fa-solid fa-music"></i>' : 
+                        '<i class="fa-solid fa-slash" style="color:#ff0077;"></i>';
+                };
+                updateMusicIcon();
+                musicBtn.addEventListener('click', () => {
+                    window.cosmicAudio.init();
+                    window.cosmicAudio.toggleMusic();
+                    updateMusicIcon();
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

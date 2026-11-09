@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Enlist Pilot | Cosmic Overdrive{% endblock %}
+
+{% block content %}
+<div style="max-width: 440px; margin: 3rem auto;">
+    <div class="cyber-card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fa-solid fa-user-astronaut" style="font-size: 3rem; color: var(--cyan); filter: drop-shadow(0 0 10px var(--cyan));"></i>
+            <h1 style="font-size: 1.8rem; margin-top: 1rem;">ENLIST PILOT</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Register your unique callsign and secure your space fleet.</p>
+        </div>
+
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">
+                    Pilot Callsign (Display Name):
+                </label>
+                <input type="text" name="callsign" placeholder="e.g. StarLord, ApexRacer"
+                       style="width: 100%; padding: 0.8rem; background: rgba(5,7,18,0.8); border: 1px solid var(--border-color); border-radius: 4px; color: #fff; font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.2rem;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">
+                    Account Username:
+                </label>
+                <input type="text" name="username" required
+                       style="width: 100%; padding: 0.8rem; background: rgba(5,7,18,0.8); border: 1px solid var(--border-color); border-radius: 4px; color: #fff; font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <div style="margin-bottom: 1.8rem;">
+                <label style="display: block; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">
+                    Security Password:
+                </label>
+                <input type="password" name="password" required
+                       style="width: 100%; padding: 0.8rem; background: rgba(5,7,18,0.8); border: 1px solid var(--border-color); border-radius: 4px; color: #fff; font-family: var(--font-body); font-size: 1rem;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-id-badge"></i> COMMISSION PILOT RECORD
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+            Already commissioned? <a href="{% url 'login' %}" style="color: var(--cyan);">Pilot Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
