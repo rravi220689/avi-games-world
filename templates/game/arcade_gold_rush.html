@@ -32,12 +32,35 @@
         border-radius: 0 0 8px 8px;
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        width: 100%;
+        max-width: 800px;
     }
 
     #gold-canvas {
         display: block;
         background: #050616;
         touch-action: none;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 600px) {
+        .arcade-hud-bar {
+            padding: 0.5rem 0.8rem;
+        }
+        .arcade-hud-bar div div {
+            font-size: 1.2rem !important;
+        }
+        .pad-btn {
+            width: 55px;
+            height: 55px;
+            font-size: 1.2rem;
+        }
+        #gold-touch-jump {
+            width: 65px !important;
+            height: 65px !important;
+        }
     }
 
     .mobile-platformer-controls {

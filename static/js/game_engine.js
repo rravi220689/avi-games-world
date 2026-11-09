@@ -734,15 +734,41 @@ class SpaceRaceGame {
             this.pointerSteer = 0;
         });
 
-        // Touch Steering
+        // Touch Steering on Canvas
         this.container.addEventListener('touchstart', (e) => {
             if (window.cosmicAudio) window.cosmicAudio.init();
-            if (e.touches.length > 0) onPointerMove(e.touches[0].clientX);
-        }, { passive: true });
+            if (e.touches.length > 0) {
+                this.isPointerDown = true;
+                onPointerMove(e.touches[0].clientX);
+            }
+        }, { passive: false });
 
         this.container.addEventListener('touchmove', (e) => {
-            if (e.touches.length > 0) onPointerMove(e.touches[0].clientX);
-        }, { passive: true });
+            if (e.touches.length > 0) {
+                this.isPointerDown = true;
+                onPointerMove(e.touches[0].clientX);
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => {
+            this.isPointerDown = false;
+            this.pointerSteer = 0;
+            this.keys.up = false;
+            this.keys.down = false;
+            this.keys.left = false;
+            this.keys.right = false;
+            this.keys.boost = false;
+        });
+
+        window.addEventListener('touchcancel', () => {
+            this.isPointerDown = false;
+            this.pointerSteer = 0;
+            this.keys.up = false;
+            this.keys.down = false;
+            this.keys.left = false;
+            this.keys.right = false;
+            this.keys.boost = false;
+        });
 
         // Touch & Click On-Screen Buttons
         this.bindTouchButton('btn-touch-accel', 'up');
@@ -753,7 +779,14 @@ class SpaceRaceGame {
 
         const boostBtn = document.getElementById('btn-touch-boost');
         if (boostBtn) {
-            boostBtn.addEventListener('click', () => this.triggerInstantBoost());
+            boostBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.triggerInstantBoost();
+            });
+            boostBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.triggerInstantBoost();
+            }, { passive: false });
         }
 
         // Global mouseup release safety
@@ -782,10 +815,14 @@ class SpaceRaceGame {
         const setKey = (val) => {
             if (window.cosmicAudio) window.cosmicAudio.init();
             this.keys[keyName] = val;
+            if (val && navigator.vibrate) {
+                try { navigator.vibrate(35); } catch(err) {}
+            }
         };
 
-        btn.addEventListener('touchstart', (e) => { e.preventDefault(); setKey(true); });
-        btn.addEventListener('touchend', (e) => { e.preventDefault(); setKey(false); });
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); setKey(true); }, { passive: false });
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); setKey(false); }, { passive: false });
+        btn.addEventListener('touchcancel', (e) => { e.preventDefault(); e.stopPropagation(); setKey(false); }, { passive: false });
         btn.addEventListener('mousedown', (e) => { e.preventDefault(); setKey(true); });
         btn.addEventListener('mouseup', (e) => { e.preventDefault(); setKey(false); });
 

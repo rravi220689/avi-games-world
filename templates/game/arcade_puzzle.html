@@ -32,6 +32,8 @@
         border-radius: 0 0 8px 8px;
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        width: 100%;
+        max-width: 480px;
     }
 
     #puzzle-canvas {
@@ -39,6 +41,25 @@
         background: #070a1a;
         touch-action: none;
         cursor: pointer;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 600px) {
+        .arcade-hud-bar {
+            padding: 0.5rem 0.8rem;
+        }
+        .arcade-hud-bar div div {
+            font-size: 1.2rem !important;
+        }
+        .gem-legend {
+            gap: 0.4rem;
+        }
+        .gem-legend-item {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
     }
 
     .gem-legend {
