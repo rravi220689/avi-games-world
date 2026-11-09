@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from game.models import UserProfile, Vehicle, Track, RaceResult, UserVehicle
+from game.models import UserProfile, Vehicle, Track, RaceResult, UserVehicle, ArcadeGame, ArcadeScore
 import json
 
 class SpaceRacingTests(TestCase):
@@ -28,6 +28,30 @@ class SpaceRacingTests(TestCase):
             third_place_reward=350,
             xp_reward=300
         )
+        self.arcade_gold = ArcadeGame.objects.create(
+            slug='super-gold-rush',
+            title='Super Cosmic Gold Rush',
+            tagline='Jump & smash blocks',
+            description='Mario style cosmic coin collection',
+            credit_multiplier=1.2,
+            category='platformer'
+        )
+        self.arcade_puzzle = ArcadeGame.objects.create(
+            slug='quantum-puzzle',
+            title='Quantum Nova: Gem Match',
+            tagline='Gem match-3 puzzle',
+            description='Match quantum plasma gems',
+            credit_multiplier=1.5,
+            category='puzzle'
+        )
+        self.arcade_invaders = ArcadeGame.objects.create(
+            slug='void-invaders',
+            title='Cosmic Invaders: Void Defense',
+            tagline='Retro alien space shooter',
+            description='Defend against alien swarmers',
+            credit_multiplier=1.4,
+            category='shooter'
+        )
 
     def test_pages_load(self):
         # 1. Home
@@ -50,6 +74,12 @@ class SpaceRacingTests(TestCase):
         res = self.client.get(reverse('race_arena', kwargs={'slug': self.track.slug}))
         self.assertEqual(res.status_code, 200)
 
+        # 6. Arcade Hub & Games
+        self.assertEqual(self.client.get(reverse('arcade_hub')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('arcade_gold_rush')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('arcade_quantum_puzzle')).status_code, 200)
+        self.assertEqual(self.client.get(reverse('arcade_void_invaders')).status_code, 200)
+
     def test_api_race_finish(self):
         payload = {
             'track_id': self.track.id,
@@ -57,7 +87,8 @@ class SpaceRacingTests(TestCase):
             'best_lap_ms': 21000,
             'position': 1,
             'max_speed': 310.0,
-            'mode': 'GRAND_PRIX'
+            'mode': 'GRAND_PRIX',
+            'difficulty': 'HARD'
         }
         res = self.client.post(
             reverse('api_race_finish'),
@@ -68,7 +99,25 @@ class SpaceRacingTests(TestCase):
         data = res.json()
         self.assertTrue(data['success'])
         self.assertEqual(data['position'], 1)
-        self.assertEqual(data['credits_earned'], 1000)
+        # 1000 * 1.6 = 1600
+        self.assertEqual(data['credits_earned'], 1600)
+
+    def test_api_arcade_score(self):
+        payload = {
+            'game_slug': 'super-gold-rush',
+            'score': 800
+        }
+        res = self.client.post(
+            reverse('api_arcade_score'),
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data['success'])
+        self.assertGreater(data['credits_earned'], 0)
+        self.assertGreater(data['xp_earned'], 0)
+        self.assertEqual(data['score'], 800)
 
     def test_firewall_blocks_sql_injection(self):
         # Malicious SQL pattern in query string

@@ -9,6 +9,12 @@ urlpatterns = [
     path('leaderboards/', views.leaderboards, name='leaderboards'),
     path('profile/', views.profile_view, name='profile'),
 
+    # Arcade Games Hub & Modes
+    path('arcade/', views.arcade_hub, name='arcade_hub'),
+    path('arcade/gold-rush/', views.arcade_gold_rush, name='arcade_gold_rush'),
+    path('arcade/quantum-puzzle/', views.arcade_quantum_puzzle, name='arcade_quantum_puzzle'),
+    path('arcade/void-invaders/', views.arcade_void_invaders, name='arcade_void_invaders'),
+
     # Auth
     path('login/', views.pilot_login, name='login'),
     path('register/', views.pilot_register, name='register'),
@@ -16,6 +22,7 @@ urlpatterns = [
 
     # APIs
     path('api/race/finish/', views.api_race_finish, name='api_race_finish'),
+    path('api/arcade/score/', views.api_arcade_score, name='api_arcade_score'),
     path('api/garage/buy/', views.api_garage_buy, name='api_garage_buy'),
     path('api/garage/equip/', views.api_garage_equip, name='api_garage_equip'),
     path('api/garage/upgrade/', views.api_garage_upgrade, name='api_garage_upgrade'),

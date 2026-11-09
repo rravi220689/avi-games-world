@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Arcade Hub | Avi Games World{% endblock %}
+
+{% block extra_css %}
+<style>
+    .arcade-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .game-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .game-card:hover {
+        border-color: var(--cyan);
+        transform: translateY(-6px);
+        box-shadow: 0 12px 35px rgba(0, 240, 255, 0.25);
+    }
+
+    .game-hero-art {
+        height: 150px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        position: relative;
+    }
+
+    .art-racing {
+        background: linear-gradient(180deg, rgba(3, 6, 23, 0.2), rgba(3, 6, 23, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #00f0ff 0%, #0c1538 70%);
+    }
+
+    .art-platformer {
+        background: linear-gradient(180deg, rgba(16, 10, 3, 0.2), rgba(16, 10, 3, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #ffd700 0%, #332005 70%);
+    }
+
+    .art-puzzle {
+        background: linear-gradient(180deg, rgba(12, 3, 28, 0.2), rgba(12, 3, 28, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #bc13fe 0%, #1a0438 70%);
+    }
+
+    .art-shooter {
+        background: linear-gradient(180deg, rgba(20, 2, 8, 0.2), rgba(20, 2, 8, 0.95)), 
+                    radial-gradient(circle at 70% 30%, #ff0077 0%, #380214 70%);
+    }
+
+    .game-icon-badge {
+        position: absolute;
+        top: 1.2rem;
+        right: 1.2rem;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid;
+    }
+
+    .game-card-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .game-stats-row {
+        display: flex;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 0.8rem;
+        border-radius: 6px;
+        margin: 1.2rem 0;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-banner" style="padding: 2.2rem;">
+    <div class="hero-tag">
+        <i class="fa-solid fa-gamepad"></i> AVI GAMES WORLD &bull; INTERGALACTIC ARCADE
+    </div>
+    <h1 class="hero-title" style="font-size: 2.4rem;">SELECT YOUR ARENA</h1>
+    <p class="hero-desc" style="max-width: 750px;">
+        All games share your unified pilot profile. High scores and collected gold coins automatically convert into <strong>Cosmic Credits (CC)</strong> that you can spend tuning your spacecraft in The Hangar!
+    </p>
+</div>
+
+<div class="arcade-grid">
+    <!-- Game 1: 3D Space Car Racing -->
+    <div class="game-card">
+        <div class="game-hero-art art-racing">
+            <div class="game-icon-badge" style="border-color: var(--cyan); color: var(--cyan);">
+                <i class="fa-solid fa-shuttle-space"></i>
+            </div>
+            <span class="badge-diff diff-MEDIUM">3D FORMULA ZERO</span>
+            <h2 style="color: #fff; font-size: 1.4rem; margin-top: 0.3rem;">Cosmic Overdrive 3D</h2>
+        </div>
+        <div class="game-card-body">
+            <p style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">
+                Supersonic 3D anti-gravity space car racing! Winding cosmic highways, dynamic laser hurdles, drafting competitive AI opponents, and multi-tier difficulty modes (Cadet, Pilot, Ace).
+            </p>
+            <div class="game-stats-row">
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">GENRE</div>
+                    <strong>3D WebGL GP</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">MODES</div>
+                    <strong style="color: var(--cyan);">Simple &bull; Middle &bull; Hard</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">REWARD</div>
+                    <strong style="color: var(--amber);">Up to 3,500 CC</strong>
+                </div>
+            </div>
+            <a href="{% url 'tracks_list' %}" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-flag-checkered"></i> RACE CIRCUITS
+            </a>
+        </div>
+    </div>
+
+    <!-- Game 2: Super Cosmic Gold Rush (Mario-Style) -->
+    <div class="game-card">
+        <div class="game-hero-art art-platformer">
+            <div class="game-icon-badge" style="border-color: #ffd700; color: #ffd700;">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+            <span class="badge-diff diff-EASY" style="color: #ffd700; border-color: #ffd700;">RETRO PLATFORMER</span>
+            <h2 style="color: #fff; font-size: 1.4rem; margin-top: 0.3rem;">Super Cosmic Gold Rush</h2>
+        </div>
+        <div class="game-card-body">
+            <p style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">
+                Mario-style cosmic jumper platformer! Jump and double-jump across alien platforms, smash prize mystery <strong>[?]</strong> blocks for gold coin cascades, stomp alien crawlers, and collect shiny star treasures.
+            </p>
+            <div class="game-stats-row">
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">GENRE</div>
+                    <strong>Platformer</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">CONTROLS</div>
+                    <strong>Arrows / Touch</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">GOLD MULTIPLIER</div>
+                    <strong style="color: #ffd700;">100% CC Sync</strong>
+                </div>
+            </div>
+            <a href="{% url 'arcade_gold_rush' %}" class="btn btn-secondary" style="width: 100%; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.4);">
+                <i class="fa-solid fa-play"></i> PLAY GOLD RUSH
+            </a>
+        </div>
+    </div>
+
+    <!-- Game 3: Quantum Nova Space Puzzle -->
+    <div class="game-card">
+        <div class="game-hero-art art-puzzle">
+            <div class="game-icon-badge" style="border-color: #bc13fe; color: #bc13fe;">
+                <i class="fa-solid fa-cubes"></i>
+            </div>
+            <span class="badge-diff diff-MEDIUM" style="color: #bc13fe; border-color: #bc13fe;">QUANTUM PUZZLE</span>
+            <h2 style="color: #fff; font-size: 1.4rem; margin-top: 0.3rem;">Quantum Nova: Gem Match</h2>
+        </div>
+        <div class="game-card-body">
+            <p style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">
+                Cyberpunk Match-3 block collapse puzzle! Swap glowing quantum elements, trigger cascading gravity drops, create Supernova blast bombs, and rack up massive combo multipliers!
+            </p>
+            <div class="game-stats-row">
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">GENRE</div>
+                    <strong>Match-3 Puzzle</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">MOVES</div>
+                    <strong>25 Turns</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">COMBO BONUS</div>
+                    <strong style="color: #bc13fe;">1.2x CC Multiplier</strong>
+                </div>
+            </div>
+            <a href="{% url 'arcade_quantum_puzzle' %}" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #bc13fe, #7000ff); box-shadow: 0 0 15px rgba(188,19,254,0.4);">
+                <i class="fa-solid fa-play"></i> PLAY QUANTUM PUZZLE
+            </a>
+        </div>
+    </div>
+
+    <!-- Game 4: Cosmic Invaders -->
+    <div class="game-card">
+        <div class="game-hero-art art-shooter">
+            <div class="game-icon-badge" style="border-color: #ff0077; color: #ff0077;">
+                <i class="fa-solid fa-crosshairs"></i>
+            </div>
+            <span class="badge-diff diff-HARD">SPACE DEFENDER</span>
+            <h2 style="color: #fff; font-size: 1.4rem; margin-top: 0.3rem;">Cosmic Invaders: Void</h2>
+        </div>
+        <div class="game-card-body">
+            <p style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">
+                Classic retro space arcade shooter! Defend orbital planetary bunkers against marching waves of alien swarmers, evade plasma bombs, and take down descending alien flagships.
+            </p>
+            <div class="game-stats-row">
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">GENRE</div>
+                    <strong>Arcade Shooter</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">WAVES</div>
+                    <strong>Endless Survival</strong>
+                </div>
+                <div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">BOUNTY</div>
+                    <strong style="color: var(--pink);">1.5x CC Multiplier</strong>
+                </div>
+            </div>
+            <a href="{% url 'arcade_void_invaders' %}" class="btn btn-secondary" style="width: 100%; box-shadow: 0 0 15px rgba(255,0,119,0.4);">
+                <i class="fa-solid fa-crosshairs"></i> DEFEND VOID
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

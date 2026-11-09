@@ -136,23 +136,23 @@
 <!-- Hero Section -->
 <div class="hero-banner">
     <div class="hero-tag">
-        <i class="fa-solid fa-atom"></i> INTERGALACTIC FORMULA ZERO GP
+        <i class="fa-solid fa-gamepad"></i> WELCOME TO AVI GAMES WORLD
     </div>
-    <h1 class="hero-title">CONQUER THE COSMIC HIGHWAYS</h1>
+    <h1 class="hero-title">INTERGALACTIC RACING &amp; ARCADE UNIVERSE</h1>
     <p class="hero-desc">
-        Take control of state-of-the-art anti-gravity racing machines. Warp through Earth orbit, slalom through the Jovian asteroid belt, and defy supermassive black holes at supersonic speeds.
+        Compete in high-speed 3D anti-gravity Formula Zero races across space circuits with competitive AI and dynamic hurdles, or dive into retro arcade classics like Super Cosmic Gold Rush and Quantum Nova Puzzles!
     </p>
     <div class="hero-actions">
         {% if featured_tracks %}
             <a href="{% url 'race_arena' featured_tracks.0.slug %}" class="btn btn-primary btn-lg">
-                <i class="fa-solid fa-play"></i> LAUNCH QUICK RACE
+                <i class="fa-solid fa-play"></i> LAUNCH 3D RACE
             </a>
         {% endif %}
-        <a href="{% url 'hangar' %}" class="btn btn-secondary btn-lg">
-            <i class="fa-solid fa-rocket"></i> ENTER HANGAR
+        <a href="{% url 'arcade_hub' %}" class="btn btn-secondary btn-lg" style="background: linear-gradient(135deg, #ffaa00, #ff5500); color: #000; box-shadow: 0 0 20px rgba(255,170,0,0.4);">
+            <i class="fa-solid fa-ghost"></i> PLAY ARCADE GAMES
         </a>
-        <a href="{% url 'tracks_list' %}" class="btn btn-outline btn-lg">
-            <i class="fa-solid fa-compass"></i> SELECT CIRCUIT
+        <a href="{% url 'hangar' %}" class="btn btn-outline btn-lg">
+            <i class="fa-solid fa-rocket"></i> THE HANGAR
         </a>
     </div>
 </div>

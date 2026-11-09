@@ -133,7 +133,22 @@
                         {% endif %}
                     </div>
 
-                    <a href="{% url 'race_arena' track.slug %}" class="btn btn-primary" style="width: 100%;">
+                    <div style="margin-bottom: 0.8rem;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">Select Difficulty Mode:</div>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <a href="{% url 'race_arena' track.slug %}?diff=EASY" class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.7rem; color: var(--lime); border-color: rgba(0,255,136,0.3);">
+                                SIMPLE
+                            </a>
+                            <a href="{% url 'race_arena' track.slug %}?diff=MEDIUM" class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.7rem; color: var(--cyan); border-color: rgba(0,240,255,0.3);">
+                                MIDDLE
+                            </a>
+                            <a href="{% url 'race_arena' track.slug %}?diff=HARD" class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.7rem; color: var(--pink); border-color: rgba(255,0,119,0.3);">
+                                HARD (1.6x)
+                            </a>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'race_arena' track.slug %}?diff=MEDIUM" class="btn btn-primary" style="width: 100%;">
                         <i class="fa-solid fa-play"></i> LAUNCH RACE
                     </a>
                 </div>

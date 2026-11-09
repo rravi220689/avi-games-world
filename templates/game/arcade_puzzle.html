@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Quantum Nova: Gem Match | Avi Games World{% endblock %}
+
+{% block extra_css %}
+<style>
+    .arcade-game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .arcade-hud-bar {
+        width: 100%;
+        max-width: 480px;
+        background: rgba(12, 18, 44, 0.85);
+        border: 1px solid var(--border-color);
+        border-radius: 8px 8px 0 0;
+        padding: 0.8rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    }
+
+    .canvas-wrapper {
+        position: relative;
+        border: 2px solid var(--border-color);
+        border-radius: 0 0 8px 8px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    #puzzle-canvas {
+        display: block;
+        background: #070a1a;
+        touch-action: none;
+        cursor: pointer;
+    }
+
+    .gem-legend {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .gem-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        background: rgba(13, 19, 44, 0.6);
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 240, 255, 0.1);
+    }
+
+    .gem-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        box-shadow: 0 0 6px currentColor;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="arcade-game-container">
+    <div style="display: flex; justify-content: space-between; width: 100%; max-width: 600px; margin-bottom: 0.8rem; align-items: center;">
+        <div>
+            <h1 style="font-size: 1.8rem; color: #00f0ff;"><i class="fa-solid fa-gem"></i> QUANTUM NOVA</h1>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Match 3 or more cosmic plasma gems to initiate chain reactions &amp; earn credits!</p>
+        </div>
+        <a href="{% url 'arcade_hub' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Arcade Hub</a>
+    </div>
+
+    <!-- Puzzle HUD -->
+    <div class="arcade-hud-bar">
+        <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">SCORE</span>
+            <div id="puzzle-hud-score" style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff;">0</div>
+        </div>
+        <div>
+            <span style="font-size: 0.75rem; color: var(--amber); text-transform: uppercase;"><i class="fa-solid fa-hourglass-half"></i> MOVES LEFT</span>
+            <div id="puzzle-hud-moves" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--amber);">25</div>
+        </div>
+        <div>
+            <span style="font-size: 0.75rem; color: #00f0ff; text-transform: uppercase;"><i class="fa-solid fa-bolt"></i> MULTIPLIER</span>
+            <div style="font-family: var(--font-heading); font-size: 1.6rem; color: #00f0ff;">1.5x</div>
+        </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-wrapper">
+        <canvas id="puzzle-canvas"></canvas>
+    </div>
+
+    <!-- Gem Legend -->
+    <div class="gem-legend">
+        <div class="gem-legend-item"><span class="gem-dot" style="background:#ff0055; color:#ff0055;"></span> Plasma Ruby</div>
+        <div class="gem-legend-item"><span class="gem-dot" style="background:#00f0ff; color:#00f0ff;"></span> Ion Cyan</div>
+        <div class="gem-legend-item"><span class="gem-dot" style="background:#ffd700; color:#ffd700;"></span> Warp Gold</div>
+        <div class="gem-legend-item"><span class="gem-dot" style="background:#00ff88; color:#00ff88;"></span> Bio Emerald</div>
+        <div class="gem-legend-item"><span class="gem-dot" style="background:#bc13fe; color:#bc13fe;"></span> Void Amethyst</div>
+    </div>
+
+    <!-- Controls Hint -->
+    <div class="hud-controls-hint" style="position: static; transform: none; margin-top: 1rem;">
+        <span><i class="fa-solid fa-arrow-pointer"></i> Click / Tap two adjacent gems to swap them</span>
+        <span>Match 4+ for Supernova Bombs!</span>
+    </div>
+</div>
+
+<!-- Game Finish Modal -->
+<div id="puzzle-finish-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="font-size: 2.2rem; color: #00f0ff; margin-bottom: 0.5rem;"><i class="fa-solid fa-gem"></i> SEQUENCE COMPLETED!</h2>
+        <div style="font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem;">Quantum resonance matrix cleared! Rewards transferred to pilot account.</div>
+
+        <div class="modal-stats-grid">
+            <div class="modal-stat-box">
+                <div class="hud-label">PUZZLE SCORE</div>
+                <div id="puzzle-modal-score" style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff;">0</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">RESONANCE RATING</div>
+                <div style="font-family: var(--font-heading); font-size: 1.6rem; color: #00f0ff;">S-TIER</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">CREDITS SYNCED</div>
+                <div id="puzzle-modal-credits" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--amber);">+0 CC</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">PILOT XP</div>
+                <div id="puzzle-modal-xp" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--lime);">+0 XP</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.location.reload();" class="btn btn-primary">
+                <i class="fa-solid fa-rotate-right"></i> PLAY AGAIN
+            </button>
+            <a href="{% url 'arcade_hub' %}" class="btn btn-secondary">
+                <i class="fa-solid fa-ghost"></i> ARCADE HUB
+            </a>
+            <a href="{% url 'hangar' %}" class="btn btn-outline">
+                <i class="fa-solid fa-wrench"></i> SPEND IN HANGAR
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/quantum_puzzle.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.quantumPuzzle = new QuantumPuzzleGame('puzzle-canvas');
+    });
+</script>
+{% endblock %}

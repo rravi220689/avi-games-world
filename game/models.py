@@ -185,6 +185,7 @@ class RaceResult(models.Model):
     track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name='race_results')
     vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True, blank=True)
     mode = models.CharField(max_length=20, choices=MODE_CHOICES, default='GRAND_PRIX')
+    difficulty = models.CharField(max_length=20, default='MEDIUM') # EASY, MEDIUM, HARD
     position = models.IntegerField(default=1)  # 1 = 1st place
     total_time_ms = models.IntegerField()      # Milliseconds (e.g., 94320 = 1:34.320)
     best_lap_ms = models.IntegerField()        # Fastest single lap
@@ -233,3 +234,40 @@ class UserAchievement(models.Model):
 
     def __str__(self):
         return f"{self.profile} - {self.achievement.title}"
+
+
+class ArcadeGame(models.Model):
+    CATEGORY_CHOICES = [
+        ('platformer', 'Retro Platformer (Mario Style)'),
+        ('puzzle', 'Cybernetic Match Puzzle'),
+        ('shooter', 'Retro Space Shooter'),
+    ]
+
+    slug = models.SlugField(unique=True)
+    title = models.CharField(max_length=100)
+    tagline = models.CharField(max_length=150)
+    description = models.TextField()
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
+    icon = models.CharField(max_length=50, default='fa-gamepad')
+    badge_color = models.CharField(max_length=20, default='#00f0ff')
+    credit_multiplier = models.FloatField(default=1.0)
+    plays_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class ArcadeScore(models.Model):
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='arcade_scores')
+    game = models.ForeignKey(ArcadeGame, on_delete=models.CASCADE, related_name='scores')
+    score = models.IntegerField()
+    credits_earned = models.IntegerField(default=0)
+    xp_earned = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-score', '-created_at']
+
+    def __str__(self):
+        return f"{self.profile.display_name} - {self.game.title}: {self.score} pts"

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Cosmic Overdrive | 3D Space Car Racing{% endblock %}</title>
+    <title>{% block title %}Avi Games World | 3D Space Racing & Arcade{% endblock %}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,13 +28,14 @@
     <!-- Top Navigation Bar -->
     <nav class="navbar">
         <a href="{% url 'home' %}" class="nav-brand">
-            <i class="fa-solid fa-shuttle-space brand-icon"></i>
-            COSMIC<span class="highlight">OVERDRIVE</span>
+            <i class="fa-solid fa-gamepad brand-icon"></i>
+            AVI<span class="highlight">GAMES WORLD</span>
         </a>
 
         <ul class="nav-menu">
             <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> HQ</a></li>
-            <li><a href="{% url 'tracks_list' %}" class="nav-link {% if request.resolver_match.url_name == 'tracks_list' %}active{% endif %}"><i class="fa-solid fa-flag-checkered"></i> Circuits</a></li>
+            <li><a href="{% url 'tracks_list' %}" class="nav-link {% if request.resolver_match.url_name == 'tracks_list' %}active{% endif %}"><i class="fa-solid fa-flag-checkered"></i> 3D Racing</a></li>
+            <li><a href="{% url 'arcade_hub' %}" class="nav-link {% if 'arcade' in request.resolver_match.url_name %}active{% endif %}" style="color: var(--amber);"><i class="fa-solid fa-ghost"></i> Arcade Hub</a></li>
             <li><a href="{% url 'hangar' %}" class="nav-link {% if request.resolver_match.url_name == 'hangar' %}active{% endif %}"><i class="fa-solid fa-wrench"></i> Hangar</a></li>
             <li><a href="{% url 'leaderboards' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboards' %}active{% endif %}"><i class="fa-solid fa-trophy"></i> Rankings</a></li>
             <li><a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><i class="fa-solid fa-id-card"></i> Dossier</a></li>
@@ -87,7 +88,7 @@
 
     <!-- Global Footer -->
     <footer>
-        <p>&copy; 2026 Cosmic Overdrive: Anti-Gravity Space GP | Built with Python Django &amp; Three.js</p>
+        <p>&copy; 2026 Avi Games World | 3D Space Racing, Mario Gold Mining &amp; Arcade Universe</p>
     </footer>
 
     <!-- Web Audio Engine Script -->

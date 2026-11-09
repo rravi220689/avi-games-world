@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from game.models import Vehicle, Track, Achievement, UserProfile, RaceResult
+from game.models import Vehicle, Track, Achievement, UserProfile, RaceResult, ArcadeGame
 import random
 
 class Command(BaseCommand):
@@ -276,5 +276,44 @@ class Command(BaseCommand):
                         'max_speed_kmh': round(260.0 + random.uniform(10, 80), 1),
                     }
                 )
+
+        # Seed Arcade Games
+        self.stdout.write("Seeding Cosmic Arcade Games...")
+        arcade_games_data = [
+            {
+                'slug': 'super-gold-rush',
+                'title': 'Super Cosmic Gold Rush',
+                'tagline': 'Mario-inspired cosmic gold miner platformer',
+                'description': 'Jump, dash, and double-jump across alien platforms, smash prize mystery blocks, collect shiny gold nuggets, dodge spiked crawler drones, and bank high scores directly into your Cosmic Credits!',
+                'category': 'platformer',
+                'icon': 'fa-coins',
+                'badge_color': '#ffd700',
+                'credit_multiplier': 1.0,
+            },
+            {
+                'slug': 'quantum-puzzle',
+                'title': 'Quantum Nova: Gem Match',
+                'tagline': 'Cybernetic quantum block collapse & chain reaction puzzle',
+                'description': 'Align radioactive plasma cores, dark matter cubes, and warp prisms. Trigger cascading multi-tier chain combos, shatter the puzzle grid, and generate vast quantum credit payouts!',
+                'category': 'puzzle',
+                'icon': 'fa-cubes',
+                'badge_color': '#00f0ff',
+                'credit_multiplier': 1.2,
+            },
+            {
+                'slug': 'void-invaders',
+                'title': 'Cosmic Invaders: Void Defense',
+                'tagline': 'Classic retro-futuristic arcade starfighter shooter',
+                'description': 'Defend orbital planetary shields against descending armadas of alien swarmers and motherships. Upgrade dual laser cannons, deploy bomb nukes, and survive endless waves.',
+                'category': 'shooter',
+                'icon': 'fa-crosshairs',
+                'badge_color': '#ff0077',
+                'credit_multiplier': 1.5,
+            },
+        ]
+
+        for ag in arcade_games_data:
+            obj, created = ArcadeGame.objects.update_or_create(slug=ag['slug'], defaults=ag)
+            self.stdout.write(f"  {'Created' if created else 'Updated'} arcade game: {obj.title}")
 
         self.stdout.write(self.style.SUCCESS("Successfully seeded all game data!"))

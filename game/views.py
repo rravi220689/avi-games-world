@@ -10,7 +10,8 @@ from django.db.models import Min, Q
 
 from .models import (
     UserProfile, Vehicle, UserVehicle, Track,
-    RaceResult, Achievement, UserAchievement
+    RaceResult, Achievement, UserAchievement,
+    ArcadeGame, ArcadeScore
 )
 from .context_processors import get_or_create_profile
 
@@ -70,10 +71,14 @@ def tracks_list(request):
 
 @ensure_csrf_cookie
 def race_arena(request, slug):
-    """3D Space Race game view."""
+    """3D Space Race game view with difficulty modes and hurdles."""
     profile = get_or_create_profile(request)
     track = get_object_or_404(Track, slug=slug)
     equipped_uv = profile.get_equipped_user_vehicle()
+
+    difficulty = request.GET.get('diff', 'MEDIUM').upper()
+    if difficulty not in ('EASY', 'MEDIUM', 'HARD'):
+        difficulty = 'MEDIUM'
 
     if not equipped_uv:
         messages.warning(request, "No space racer equipped! Selecting starter craft.")
@@ -91,6 +96,7 @@ def race_arena(request, slug):
             'laps': track.laps,
             'length_km': track.length_km,
             'theme': track.theme,
+            'difficulty_mode': difficulty,
             'skybox_color': track.skybox_color,
             'road_primary_color': track.road_primary_color,
             'road_grid_color': track.road_grid_color,
@@ -119,6 +125,7 @@ def race_arena(request, slug):
     context = {
         'track': track,
         'equipped_uv': equipped_uv,
+        'difficulty': difficulty,
         'race_config_json': json.dumps(race_config),
     }
     return render(request, 'game/race_arena.html', context)
@@ -247,6 +254,7 @@ def api_race_finish(request):
         position = int(data.get('position', 1))
         max_speed = float(data.get('max_speed', 0.0))
         mode = data.get('mode', 'GRAND_PRIX')
+        difficulty = data.get('difficulty', 'MEDIUM').upper()
 
         profile = get_or_create_profile(request)
         track = get_object_or_404(Track, id=track_id)
@@ -257,21 +265,27 @@ def api_race_finish(request):
         if total_time_ms < 15000:
             return JsonResponse({'success': False, 'error': 'Invalid race time.'}, status=400)
 
-        # Calculate rewards based on podium placement
+        # Calculate rewards based on podium placement & difficulty multiplier
+        diff_mult = 1.0
+        if difficulty == 'HARD':
+            diff_mult = 1.6
+        elif difficulty == 'EASY':
+            diff_mult = 0.85
+
         credits_awarded = 0
         xp_awarded = 0
         if position == 1:
-            credits_awarded = track.first_place_reward
-            xp_awarded = track.xp_reward
+            credits_awarded = int(track.first_place_reward * diff_mult)
+            xp_awarded = int(track.xp_reward * diff_mult)
         elif position == 2:
-            credits_awarded = track.second_place_reward
-            xp_awarded = int(track.xp_reward * 0.75)
+            credits_awarded = int(track.second_place_reward * diff_mult)
+            xp_awarded = int(track.xp_reward * 0.75 * diff_mult)
         elif position == 3:
-            credits_awarded = track.third_place_reward
-            xp_awarded = int(track.xp_reward * 0.50)
+            credits_awarded = int(track.third_place_reward * diff_mult)
+            xp_awarded = int(track.xp_reward * 0.50 * diff_mult)
         else:
-            credits_awarded = int(track.third_place_reward * 0.5)
-            xp_awarded = int(track.xp_reward * 0.3)
+            credits_awarded = int(track.third_place_reward * 0.5 * diff_mult)
+            xp_awarded = int(track.xp_reward * 0.3 * diff_mult)
 
         # Save Race Result
         result = RaceResult.objects.create(
@@ -279,6 +293,7 @@ def api_race_finish(request):
             track=track,
             vehicle=vehicle,
             mode=mode,
+            difficulty=difficulty,
             position=position,
             total_time_ms=total_time_ms,
             best_lap_ms=best_lap_ms,
@@ -569,3 +584,131 @@ def pilot_logout(request):
     logout(request)
     messages.info(request, "Logged out. Switched to guest flight mode.")
     return redirect('home')
+
+
+# ---------------- ARCADE GAMES PLATFORM ---------------- #
+
+def arcade_hub(request):
+    """Avi Games World: Arcade Hub showcasing all playable games."""
+    profile = get_or_create_profile(request)
+    games = ArcadeGame.objects.all().order_by('id')
+
+    games_data = []
+    for g in games:
+        my_high_score = profile.arcade_scores.filter(game=g).order_by('-score').first()
+        best_overall = g.scores.order_by('-score').select_related('profile').first()
+        games_data.append({
+            'game': g,
+            'my_high_score': my_high_score,
+            'best_overall': best_overall,
+        })
+
+    context = {
+        'profile': profile,
+        'games_data': games_data,
+    }
+    return render(request, 'game/arcade_hub.html', context)
+
+
+@ensure_csrf_cookie
+def arcade_gold_rush(request):
+    """Super Cosmic Gold Rush (Mario-inspired platformer)."""
+    profile = get_or_create_profile(request)
+    game = get_object_or_404(ArcadeGame, slug='super-gold-rush')
+    game.plays_count += 1
+    game.save(update_fields=['plays_count'])
+
+    top_scores = game.scores.select_related('profile').order_by('-score')[:10]
+    my_best = profile.arcade_scores.filter(game=game).order_by('-score').first()
+
+    context = {
+        'profile': profile,
+        'game': game,
+        'top_scores': top_scores,
+        'my_best': my_best,
+    }
+    return render(request, 'game/arcade_gold_rush.html', context)
+
+
+@ensure_csrf_cookie
+def arcade_quantum_puzzle(request):
+    """Quantum Nova: Space Gem Match Puzzle."""
+    profile = get_or_create_profile(request)
+    game = get_object_or_404(ArcadeGame, slug='quantum-puzzle')
+    game.plays_count += 1
+    game.save(update_fields=['plays_count'])
+
+    top_scores = game.scores.select_related('profile').order_by('-score')[:10]
+    my_best = profile.arcade_scores.filter(game=game).order_by('-score').first()
+
+    context = {
+        'profile': profile,
+        'game': game,
+        'top_scores': top_scores,
+        'my_best': my_best,
+    }
+    return render(request, 'game/arcade_puzzle.html', context)
+
+
+@ensure_csrf_cookie
+def arcade_void_invaders(request):
+    """Cosmic Invaders: Void Defense retro space shooter."""
+    profile = get_or_create_profile(request)
+    game = get_object_or_404(ArcadeGame, slug='void-invaders')
+    game.plays_count += 1
+    game.save(update_fields=['plays_count'])
+
+    top_scores = game.scores.select_related('profile').order_by('-score')[:10]
+    my_best = profile.arcade_scores.filter(game=game).order_by('-score').first()
+
+    context = {
+        'profile': profile,
+        'game': game,
+        'top_scores': top_scores,
+        'my_best': my_best,
+    }
+    return render(request, 'game/arcade_invaders.html', context)
+
+
+@require_POST
+def api_arcade_score(request):
+    """Submit score for any arcade game and claim CC + XP rewards."""
+    try:
+        data = json.loads(request.body)
+        game_slug = data.get('game_slug')
+        score = int(data.get('score', 0))
+
+        if score < 0:
+            return JsonResponse({'success': False, 'error': 'Invalid score.'}, status=400)
+
+        profile = get_or_create_profile(request)
+        game = get_object_or_404(ArcadeGame, slug=game_slug)
+
+        # Calculate reward: score / 10 * multiplier
+        credits_earned = max(10, int((score / 8) * game.credit_multiplier))
+        xp_earned = max(15, int((score / 15) * game.credit_multiplier))
+
+        score_rec = ArcadeScore.objects.create(
+            profile=profile,
+            game=game,
+            score=score,
+            credits_earned=credits_earned,
+            xp_earned=xp_earned
+        )
+
+        old_level = profile.level
+        profile.add_credits(credits_earned)
+        profile.add_xp(xp_earned)
+
+        return JsonResponse({
+            'success': True,
+            'score': score,
+            'credits_earned': credits_earned,
+            'xp_earned': xp_earned,
+            'new_credits': profile.credits,
+            'new_level': profile.level,
+            'level_up': profile.level > old_level,
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+

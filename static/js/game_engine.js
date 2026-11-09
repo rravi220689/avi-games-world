@@ -21,11 +21,13 @@ class SpaceRaceGame {
         this.isFinished = false;
         this.isStarted = true; // Active immediately!
         this.cameraMode = 0;   // 0: Dynamic Chase, 1: Close Action, 2: Cockpit
+        this.difficulty = this.trackConfig.difficulty_mode || 'MEDIUM'; // EASY, MEDIUM, HARD
 
         // Track Spline & Objects
         this.trackSpline = null;
         this.trackMesh = null;
         this.speedPads = [];
+        this.hurdles = [];     // Dynamic Electric Laser Hurdles!
         this.asteroids = [];
         this.trackLength = 1000;
 
@@ -398,6 +400,60 @@ class SpaceRaceGame {
             this.speedPads.push({ mesh: pad, t: t });
         });
 
+        // Dynamic Electric Laser Hurdle Barriers
+        this.hurdles = [];
+        const hurdleConfigs = this.difficulty === 'EASY' 
+            ? [{ t: 0.45, gapSide: 'right' }] 
+            : (this.difficulty === 'HARD'
+                ? [{ t: 0.20, gapSide: 'left' }, { t: 0.42, gapSide: 'right' }, { t: 0.68, gapSide: 'left' }, { t: 0.88, gapSide: 'right' }]
+                : [{ t: 0.25, gapSide: 'left' }, { t: 0.50, gapSide: 'right' }, { t: 0.75, gapSide: 'left' }]);
+
+        hurdleConfigs.forEach(hc => {
+            const pt = this.trackSpline.getPointAt(hc.t);
+            const tangent = this.trackSpline.getTangentAt(hc.t).normalize();
+            let normal = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0, 1, 0)).normalize();
+            if (normal.lengthSq() < 0.001) normal.set(1, 0, 0);
+
+            // Left & Right Electric Pylons
+            const pylonGeo = new THREE.CylinderGeometry(1.2, 1.6, 12, 12);
+            const pylonMat = new THREE.MeshStandardMaterial({ color: 0xff0055, emissive: 0xff0033, emissiveIntensity: 0.8 });
+            
+            const lPylon = new THREE.Mesh(pylonGeo, pylonMat);
+            lPylon.position.copy(pt).add(normal.clone().multiplyScalar(-trackWidth / 2)).add(new THREE.Vector3(0, 6, 0));
+            this.scene.add(lPylon);
+
+            const rPylon = new THREE.Mesh(pylonGeo, pylonMat);
+            rPylon.position.copy(pt).add(normal.clone().multiplyScalar(trackWidth / 2)).add(new THREE.Vector3(0, 6, 0));
+            this.scene.add(rPylon);
+
+            // Pulsing Electric Laser Beam
+            const beamWidth = trackWidth * 0.65;
+            const beamGeo = new THREE.BoxGeometry(beamWidth, 2.0, 1.4);
+            const beamMat = new THREE.MeshBasicMaterial({ color: 0xff0055, transparent: true, opacity: 0.85 });
+            const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+
+            let beamOffset = 0;
+            let safeRange = [-0.3, 0.3];
+            if (hc.gapSide === 'left') {
+                beamOffset = (trackWidth * 0.2);
+                safeRange = [-1.02, -0.15];
+            } else if (hc.gapSide === 'right') {
+                beamOffset = -(trackWidth * 0.2);
+                safeRange = [0.15, 1.02];
+            }
+
+            beamMesh.position.copy(pt).add(normal.clone().multiplyScalar(beamOffset)).add(new THREE.Vector3(0, 2.5, 0));
+            beamMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), tangent);
+            this.scene.add(beamMesh);
+
+            this.hurdles.push({
+                t: hc.t,
+                mesh: beamMesh,
+                safeRange: safeRange,
+                lastHitTime: 0
+            });
+        });
+
         // Floating Start Arch
         const startPt = this.trackSpline.getPointAt(0);
         const startTangent = this.trackSpline.getTangentAt(0).normalize();
@@ -548,10 +604,14 @@ class SpaceRaceGame {
     }
 
     buildAIOpponents() {
+        let diffFactor = 0.97;
+        if (this.difficulty === 'EASY') diffFactor = 0.86;
+        if (this.difficulty === 'HARD') diffFactor = 1.08;
+
         const aiDefs = [
-            { name: "Nova-7", color: "#ff0077", trail_color: "#ff0077", speedFactor: 0.94, offset: -0.4, model_type: 'dart' },
-            { name: "Apex-V", color: "#00f0ff", trail_color: "#00f0ff", speedFactor: 0.97, offset: 0.4, model_type: 'speeder' },
-            { name: "Vortex-X", color: "#ffd700", trail_color: "#ffaa00", speedFactor: 0.92, offset: 0.0, model_type: 'hyperwing' }
+            { name: "Nova-7 [Hunter]", color: "#ff0077", trail_color: "#ff0077", speedFactor: 0.95 * diffFactor, offset: -0.4, model_type: 'dart' },
+            { name: "Apex-V [Tactician]", color: "#00f0ff", trail_color: "#00f0ff", speedFactor: 0.98 * diffFactor, offset: 0.4, model_type: 'speeder' },
+            { name: "Vortex-X [Apex Rival]", color: "#ffd700", trail_color: "#ffaa00", speedFactor: 0.93 * diffFactor, offset: 0.0, model_type: 'hyperwing' }
         ];
 
         this.aiRacers = aiDefs.map((def, idx) => {
@@ -569,6 +629,7 @@ class SpaceRaceGame {
                 lap: 1,
                 rollAngle: 0,
                 color: def.color,
+                isDrafting: false
             };
         });
     }
@@ -859,7 +920,25 @@ class SpaceRaceGame {
                 this.player.speed = Math.min(this.player.maxSpeed * 1.55, this.player.speed + 80);
                 this.player.boost = Math.min(this.player.maxBoost, this.player.boost + 40);
                 if (window.cosmicAudio) window.cosmicAudio.playSpeedPad();
+                if (navigator.vibrate) navigator.vibrate(50);
                 this.showNotification("HYPER SPEED PAD!");
+            }
+        });
+
+        // Dynamic Hurdle Collision Trigger
+        const nowMs = performance.now();
+        this.hurdles.forEach(h => {
+            if (Math.abs(t - h.t) < 0.009 && (nowMs - h.lastHitTime > 1500)) {
+                const isSafe = (this.player.lateralOffset >= h.safeRange[0] && this.player.lateralOffset <= h.safeRange[1]);
+                if (!isSafe) {
+                    h.lastHitTime = nowMs;
+                    this.player.shield = Math.max(0, this.player.shield - 20);
+                    this.player.speed = Math.max(60, this.player.speed * 0.72);
+                    if (this.player.shieldGlow) this.player.shieldGlow.material.opacity = 0.8;
+                    if (window.cosmicAudio) window.cosmicAudio.playCrash();
+                    if (navigator.vibrate) navigator.vibrate(120);
+                    this.showNotification("⚡ LASER HURDLE COLLISION! -20 SHIELD");
+                }
             }
         });
 
@@ -910,7 +989,17 @@ class SpaceRaceGame {
         if (this.isFinished) return;
 
         this.aiRacers.forEach(ai => {
-            ai.speed = THREE.MathUtils.lerp(ai.speed, ai.maxSpeed, delta * 1.5);
+            // Competitive Slipstream Drafting: If behind player, get draft acceleration boost and steer to overtake!
+            const distBehind = this.player.trackProgress - ai.trackProgress;
+            let targetSpeed = ai.maxSpeed;
+            if (distBehind > 0 && distBehind < 0.035 && Math.abs(ai.lateralOffset - this.player.lateralOffset) < 0.4) {
+                targetSpeed = ai.maxSpeed * 1.14; // Slipstream draft boost!
+                if (Math.random() < 0.05) {
+                    ai.targetOffset = this.player.lateralOffset > 0 ? -0.55 : 0.55; // Steer into clear lane to pass!
+                }
+            }
+
+            ai.speed = THREE.MathUtils.lerp(ai.speed, targetSpeed, delta * 1.6);
             const speedUnits = (ai.speed * 0.2778) * delta * 1.6;
             ai.trackProgress += (speedUnits / this.trackLength);
 
@@ -978,6 +1067,7 @@ class SpaceRaceGame {
             best_lap_ms: Math.round(this.player.bestLapMs),
             position: this.player.position,
             max_speed: Math.round(this.player.maxSpeed),
+            difficulty: this.difficulty,
             mode: 'GRAND_PRIX'
         };
 

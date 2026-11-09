@@ -1,58 +1,59 @@
-# COSMIC OVERDRIVE: 3D Anti-Gravity Space GP 🚀🏎️
+# AVI GAMES WORLD 🚀🎮
 
-A full-featured, high-speed 3D space car racing game built with **Python 3.14**, **Django 6**, **PostgreSQL**, **Three.js**, and the **Web Audio API**.
+A premier futuristic web gaming portal built with **Python 3.14**, **Django 6**, **PostgreSQL**, **Three.js**, and the **Web Audio API**. Featuring anti-gravity 3D space racing with multiple difficulty modes, track hurdles, slipstream AI, plus an Arcade Hub with Mario-style gold mining, gem puzzle match-3, and retro space invaders.
+
+GitHub Repository: [https://github.com/rravi220689/avi-games-world](https://github.com/rravi220689/avi-games-world)
+Active Branch: `dev`
 
 ---
 
-## 🌟 Key Features
+## 🌟 Game Highlights
 
-### 1. 3D WebGL Space Racing Engine
-- **Full 3D Tracks**: Floating cosmic highways winding through outer space with glowing neon guide rails, magnetic grip assist, elevation drops, and banked turns.
-- **5 Unlockable Futuristic Space Vessels**:
-  - `Aero Viper` (Cadet interceptor - balanced)
-  - `Nebula Dart` (Ultralight needle racer - extreme cornering)
-  - `Titan Vanguard` (Heavy dreadnought - maximum deflectors & top speed)
-  - `Quantum Striker` (Tachyonic pulse drive - sustained nitro)
-  - `Void Reaver` (Apex singularity speedster - dark matter alloy)
-- **Competitive AI Racers**: Dynamic AI rivals (`Nova-7`, `Apex-V`, `Vortex-X`) with real-time lap and sector ranking.
-- **Speed Booster Pads**: Glowing golden chevron pads that launch craft into hyper-acceleration.
-- **Built-in Web Audio Synthesizer**: Procedural sci-fi engine pitch modulation, nitro whoosh, collision crunches, and algorithmic synthwave music loops without needing external audio files.
-- **Multiple Camera Views**: Dynamic Chase Cam, Close Action Cam, and Cockpit / Hood Cam (toggle with `C`).
+### 1. 3D Anti-Gravity Space GP
+- **Difficulty Modes**:
+  - **Simple (Easy)**: Relaxed cruise speeds, gentle AI, low hurdle density.
+  - **Middle (Medium)**: Competitive racing speeds, alert AI, balanced hurdles.
+  - **Hard**: Extreme hyper-drive speeds, cutthroat AI, frequent pulsing electric hurdle gates (+60% Credit & XP bonus!).
+- **Dynamic Track Hurdles**:
+  - Pulsing electric laser gates with energy arcs.
+  - Collision damage, temporary velocity drag, and mobile haptic vibration (`navigator.vibrate(120)`).
+- **Competitive AI Opponents**:
+  - Slipstream drafting and aggressive overtaking tactics.
+  - Real-time sector positioning and live radar minimap.
+- **5 Sci-Fi Spacecraft**: `Aero Viper`, `Nebula Dart`, `Titan Vanguard`, `Quantum Striker`, `Void Reaver`.
+- **Hangar & Tuning Garage**: Upgrade Engine, Thrusters, Handling, Shields, and Nitro up to Mk V, plus custom hull paint and jet trail colors.
 
-### 2. Simple, Intuitive & Attractive Controls
-- **Auto-Cruise Assist**: Smooth cruise acceleration enabled by default so you can focus on thrilling cornering and boosts!
-- **Keyboard Controls**:
-  - `W` / `↑` : Throttle / Accelerate
-  - `S` / `↓` : Brake / Reverse
-  - `A` / `←` : Steer Left
-  - `D` / `→` : Steer Right
-  - `SPACE` : Instant Warp Nitro Discharge
-  - `SHIFT` : Sustained Nitro Boost
-  - `C` : Toggle Camera View
-  - `R` : Reset Position
-  - `M` : Toggle Sound Mute
-- **Mouse / Touch Drag Steering**: Simply click and move your mouse or drag your finger across the screen to glide smoothly across the track.
-- **On-Screen Touch Buttons**: Dedicated responsive touch buttons for mobile and tablet players.
+### 2. Multi-Game Arcade Hub (Unified Economy)
+- **Super Cosmic Gold Rush (Mario-Inspired Platformer)**:
+  - Smash glowing `[?]` blocks from underneath for coins.
+  - Stomp purple alien crawlers to clear platforms.
+  - Double-tap jump for rocket-thruster jet leaps.
+- **Quantum Nova: Space Gem Match (Cyberpunk Puzzle)**:
+  - Match 3 or more plasma gems (Ruby, Cyan, Gold, Emerald, Amethyst).
+  - Chain reaction cascading gravity physics and Supernova combo detonations.
+- **Cosmic Invaders: Void Defense (Retro Space Shooter)**:
+  - Defend orbital shields with twin laser starfighter artillery.
+  - Destructible energy bunkers and alien armada formations.
+- **Unified Credit Economy**:
+  - Credits (CC) and XP earned across any game sync directly to your player account and can be spent on vehicle upgrades in the Hangar.
 
-### 3. The Hangar & Tuning Garage
-- **Interactive 3D Viewer**: Rotate and inspect your space roadster in 3D.
-- **Subsystem Upgrades (Mk I to Mk V)**:
-  - *Ion Velocity Engine* (Increases Top Speed)
-  - *Graviton Thrusters* (Increases Acceleration)
-  - *Magnetic Stabilizers* (Increases Handling Grip)
-  - *Deflector Shield Core* (Increases Shield Capacity)
-  - *Warp Nitro Reservoir* (Increases Boost Duration)
-- **Livery & Neon Trail Customizer**: Real-time color pickers for custom hull paint and ion jet flame trail.
+### 3. Full Mobile Compatibility
+- Responsive viewport scaling and touch pads:
+  - Left / Right directional touch buttons
+  - Nitro Warp & Accelerator Boost triggers
+  - Jump & Jet thrust buttons for platformer
+  - Plasma laser triggers for arcade shooter
+  - Haptic feedback on collisions and boosts
 
 ### 4. Built-in Security & Web Application Firewall (WAF)
-- **Cosmic Shield Firewall Middleware**:
+- **CosmicShieldFirewallMiddleware**:
   - SQL injection pattern interception
-  - XSS and script tag inspection
-  - Path traversal blocking (`../`)
+  - XSS and script injection filtering
+  - Directory path traversal blocking (`../`)
   - Sliding-window IP rate limiting (anti-flood/DoS shield)
   - Enforced security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `X-XSS-Protection: 1; mode=block`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`).
 
-### 5. PostgreSQL Database Architecture
+### 5. High-Performance PostgreSQL Database
 - **Host**: `160.191.14.69`
 - **Port**: `5433`
 - **Database**: `space_car_racing_db`
@@ -61,14 +62,61 @@ A full-featured, high-speed 3D space car racing game built with **Python 3.14**,
 
 ---
 
-## 🎮 How to Access the Live Site
+## 🕹️ Controls Guide
 
-The Django server is running at:
-- **Game URL**: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-- **Circuits**: [http://127.0.0.1:8000/tracks/](http://127.0.0.1:8000/tracks/)
-- **Hangar / Garage**: [http://127.0.0.1:8000/hangar/](http://127.0.0.1:8000/hangar/)
-- **Leaderboards**: [http://127.0.0.1:8000/leaderboards/](http://127.0.0.1:8000/leaderboards/)
-- **Pilot Dossier**: [http://127.0.0.1:8000/profile/](http://127.0.0.1:8000/profile/)
-- **Admin Dashboard**: [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/)
-  - *Username*: `admin`
-  - *Password*: `AdminSpace2026!`
+### 🏎️ 3D Space Car Racing
+| Key / Touch | Action |
+|---|---|
+| `W` / `↑` / `BOOST` | Throttle / Acceleration |
+| `S` / `↓` / `BRAKE` | Brake / Reverse |
+| `A` / `←` / `LEFT` | Steer Left |
+| `D` / `→` / `RIGHT` | Steer Right |
+| `SPACE` / `NITRO` | Instant Warp Nitro Discharge |
+| `SHIFT` | Sustained Afterburner Nitro |
+| `C` | Toggle Camera (Chase, Close, Cockpit) |
+| `R` | Reset Craft to Track Center |
+| `M` | Mute / Unmute Audio Synthesizer |
+| **Touch / Mouse Drag** | Glide finger or mouse to steer smoothly |
+
+### 🪙 Super Cosmic Gold Rush
+| Key / Touch | Action |
+|---|---|
+| `A` / `D` or `←` / `→` | Run Left / Right |
+| `SPACE` / `W` / `↑` | Jump / Smash `[?]` Blocks |
+| `DOUBLE SPACE` | Thruster Jet Jump |
+
+### 💎 Quantum Nova: Gem Match
+| Action | Description |
+|---|---|
+| **Tap / Click** | Click two adjacent gems to swap and form combos of 3+ |
+
+### 👾 Cosmic Invaders: Void Defense
+| Key / Touch | Action |
+|---|---|
+| `A` / `D` or `←` / `→` | Move Starfighter |
+| `SPACE` / `W` / `FIRE` | Fire Plasma Laser Artillery |
+
+---
+
+## 🚀 Quickstart
+
+1. **Activate Virtualenv**:
+   ```bash
+   source venv/bin/activate
+   ```
+
+2. **Run Migrations & Seed Game Data**:
+   ```bash
+   python manage.py migrate
+   python manage.py seed_data
+   ```
+
+3. **Start Development Server**:
+   ```bash
+   python manage.py runserver 0.0.0.0:8000
+   ```
+
+4. **Run Automated Test Suite**:
+   ```bash
+   python manage.py test game
+   ```

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cosmic Invaders: Void Defense | Avi Games World{% endblock %}
+
+{% block extra_css %}
+<style>
+    .arcade-game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .arcade-hud-bar {
+        width: 100%;
+        max-width: 640px;
+        background: rgba(12, 18, 44, 0.85);
+        border: 1px solid var(--border-color);
+        border-radius: 8px 8px 0 0;
+        padding: 0.8rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+    }
+
+    .canvas-wrapper {
+        position: relative;
+        border: 2px solid var(--border-color);
+        border-radius: 0 0 8px 8px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    #invader-canvas {
+        display: block;
+        background: #030614;
+        touch-action: none;
+    }
+
+    .mobile-invader-controls {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 640px;
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .pad-btn {
+        width: 65px;
+        height: 65px;
+        background: rgba(14, 20, 48, 0.9);
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        color: #fff;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+    }
+
+    .pad-btn:active {
+        background: var(--pink);
+        color: #fff;
+        box-shadow: 0 0 15px var(--pink);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="arcade-game-container">
+    <div style="display: flex; justify-content: space-between; width: 100%; max-width: 640px; margin-bottom: 0.8rem; align-items: center;">
+        <div>
+            <h1 style="font-size: 1.8rem; color: #ff0055;"><i class="fa-solid fa-crosshairs"></i> COSMIC INVADERS</h1>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Defend the sector against waves of alien armadas and alien plasma artillery!</p>
+        </div>
+        <a href="{% url 'arcade_hub' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Arcade Hub</a>
+    </div>
+
+    <!-- Invaders HUD -->
+    <div class="arcade-hud-bar">
+        <div>
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">DEFENSE SCORE</span>
+            <div id="invader-hud-score" style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff;">0</div>
+        </div>
+        <div>
+            <span style="font-size: 0.75rem; color: var(--amber); text-transform: uppercase;"><i class="fa-solid fa-shield-halved"></i> WAVE</span>
+            <div id="invader-hud-wave" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--amber);">1</div>
+        </div>
+        <div>
+            <span style="font-size: 0.75rem; color: var(--pink); text-transform: uppercase;"><i class="fa-solid fa-heart"></i> LIVES</span>
+            <div id="invader-hud-lives" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--pink);">3</div>
+        </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-wrapper">
+        <canvas id="invader-canvas"></canvas>
+    </div>
+
+    <!-- Mobile Touch Pad -->
+    <div class="mobile-invader-controls">
+        <div style="display: flex; gap: 1rem;">
+            <button id="invader-touch-left" class="pad-btn" title="Left"><i class="fa-solid fa-arrow-left"></i></button>
+            <button id="invader-touch-right" class="pad-btn" title="Right"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+        <div>
+            <button id="invader-touch-fire" class="pad-btn" style="border-color: #ff0055; width: 75px; height: 75px; background: rgba(255, 0, 85, 0.2);" title="Laser Fire">
+                <i class="fa-solid fa-bolt" style="color: #ff0055;"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Controls Cheat Bar -->
+    <div class="hud-controls-hint" style="position: static; transform: none; margin-top: 1rem;">
+        <span><kbd>A</kbd><kbd>D</kbd> or <kbd>←</kbd><kbd>→</kbd> Move Starfighter</span>
+        <span><kbd>SPACE</kbd> or <kbd>W</kbd> Fire Plasma Laser</span>
+        <span>Hide behind Cyan Bunkers for shield defense</span>
+    </div>
+</div>
+
+<!-- Game Finish Modal -->
+<div id="invader-finish-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="font-size: 2.2rem; color: #ff0055; margin-bottom: 0.5rem;"><i class="fa-solid fa-skull"></i> SECTOR DEFENDED!</h2>
+        <div style="font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem;">Starfighter mission debrief: combat bounty synced to your pilot balance.</div>
+
+        <div class="modal-stats-grid">
+            <div class="modal-stat-box">
+                <div class="hud-label">FINAL SCORE</div>
+                <div id="invader-modal-score" style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff;">0</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">HIGHEST WAVE</div>
+                <div id="invader-modal-wave" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--amber);">1</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">CREDITS SYNCED</div>
+                <div id="invader-modal-credits" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--amber);">+0 CC</div>
+            </div>
+            <div class="modal-stat-box">
+                <div class="hud-label">PILOT XP</div>
+                <div id="invader-modal-xp" style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--lime);">+0 XP</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.location.reload();" class="btn btn-primary">
+                <i class="fa-solid fa-rotate-right"></i> PLAY AGAIN
+            </button>
+            <a href="{% url 'arcade_hub' %}" class="btn btn-secondary">
+                <i class="fa-solid fa-ghost"></i> ARCADE HUB
+            </a>
+            <a href="{% url 'hangar' %}" class="btn btn-outline">
+                <i class="fa-solid fa-wrench"></i> SPEND IN HANGAR
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/void_invaders.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.voidInvaders = new VoidInvadersGame('invader-canvas');
+    });
+</script>
+{% endblock %}
