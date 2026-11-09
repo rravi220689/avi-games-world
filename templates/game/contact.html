@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact &amp; Suggestions | Avi Games World{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-container {
+        max-width: 1100px;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+    }
+
+    .contact-hero {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .contact-hero h1 {
+        font-family: var(--font-heading);
+        font-size: 2.4rem;
+        color: #fff;
+        text-shadow: var(--cyan-glow);
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 860px) {
+        .contact-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .contact-card {
+        background: rgba(12, 18, 44, 0.75);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-group {
+        margin-bottom: 1.4rem;
+    }
+
+    .form-label {
+        display: block;
+        font-family: var(--font-heading);
+        font-size: 0.8rem;
+        color: var(--cyan);
+        letter-spacing: 1.2px;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(6, 10, 26, 0.85);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        color: #fff;
+        padding: 0.8rem 1rem;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    textarea.form-control {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    .faq-item {
+        background: rgba(6, 10, 26, 0.6);
+        border: 1px solid rgba(0, 240, 255, 0.15);
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        margin-bottom: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .faq-item:hover {
+        border-color: var(--cyan);
+    }
+
+    .faq-question {
+        font-family: var(--font-heading);
+        font-size: 0.95rem;
+        color: #fff;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .faq-answer {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .bot-promo-banner {
+        background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(188, 19, 254, 0.15));
+        border: 1px solid var(--purple);
+        border-radius: 8px;
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+    <div class="contact-hero">
+        <h1><i class="fa-solid fa-satellite-dish" style="color: var(--cyan);"></i> TRANSMISSION RELAY</h1>
+        <p style="color: var(--text-muted); max-width: 650px; margin: 0 auto;">
+            Have an idea for a new track, space racer, or arcade game? Found a cosmic glitch?
+            Send your suggestions directly to the command deck!
+        </p>
+    </div>
+
+    <div class="contact-grid">
+        <!-- Main Transmission Form -->
+        <div class="contact-card">
+            <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem;">
+                <i class="fa-solid fa-paper-plane" style="color: var(--cyan);"></i> Send Transmission / Suggestion
+            </h2>
+
+            {% if submitted %}
+            <div style="background: rgba(0, 255, 136, 0.15); border: 1px solid var(--lime); border-radius: 8px; padding: 1.2rem; margin-bottom: 1.5rem; color: #fff;">
+                <div style="font-family: var(--font-heading); color: var(--lime); font-size: 1.1rem; margin-bottom: 0.3rem;">
+                    <i class="fa-solid fa-circle-check"></i> TRANSMISSION RECEIVED!
+                </div>
+                <p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted);">
+                    Your suggestion has been logged in the Avi Games World database with Reference <strong>#{{ ref_id }}</strong>.
+                </p>
+                <div style="font-size: 0.85rem; color: #fff;">
+                    Our team inspects every transmission to improve future updates!
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'contact' %}">
+                {% csrf_token %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="id_name">Pilot Call Sign / Name</label>
+                        <input type="text" id="id_name" name="name" class="form-control" value="{{ profile.display_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="id_email">Galactic Comm / Email (Optional)</label>
+                        <input type="email" id="id_email" name="email" class="form-control" placeholder="pilot@galaxy.net">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_category">Category</label>
+                    <select id="id_category" name="category" class="form-control">
+                        {% for val, label in categories %}
+                        <option value="{{ val }}" {% if val == 'suggestion' %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_subject">Transmission Subject</label>
+                    <input type="text" id="id_subject" name="subject" class="form-control" placeholder="e.g. Idea for a Cyber-Moon Circuit" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="id_message">Transmission Message / Idea</label>
+                    <textarea id="id_message" name="message" class="form-control" placeholder="Share your suggestions, feature requests, or notes with us in detail..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-size: 1rem;">
+                    <i class="fa-solid fa-satellite"></i> TRANSMIT TO AVI GAMES WORLD
+                </button>
+            </form>
+        </div>
+
+        <!-- Sidebar / AI Bot & FAQ -->
+        <div>
+            <!-- AI Help Bot Callout -->
+            <div class="bot-promo-banner">
+                <div style="font-size: 2.2rem; color: var(--cyan);">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <div style="font-family: var(--font-heading); color: #fff; font-size: 1rem; margin-bottom: 0.2rem;">
+                        Instant Answers via AI Bot
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem;">
+                        Need instant answers about game controls, hurdles, or car tuning? Click the floating bot icon anytime!
+                    </p>
+                    <button type="button" onclick="window.cosmicBot &amp;&amp; window.cosmicBot.open();" class="btn btn-outline btn-sm">
+                        <i class="fa-solid fa-comments"></i> Open AI Assistant
+                    </button>
+                </div>
+            </div>
+
+            <!-- Frequently Asked Questions -->
+            <div class="contact-card">
+                <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 1.2rem;">
+                    <i class="fa-solid fa-circle-question" style="color: var(--amber);"></i> Pilot FAQ
+                </h3>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fa-solid fa-bolt" style="color: var(--cyan);"></i> How to earn Cosmic Credits faster?
+                    </div>
+                    <div class="faq-answer">
+                        Race on <strong>Hard Mode</strong> to earn a <strong>1.6x (60%) multiplier</strong> on all podium rewards, or collect gold in <em>Super Cosmic Gold Rush</em>!
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fa-solid fa-shield-halved" style="color: var(--pink);"></i> How do track hurdles work?
+                    </div>
+                    <div class="faq-answer">
+                        Pulsing electric laser gates appear across circuits. Hitting them discharges deflector shields, slows your craft, and triggers phone vibration. Steer clear or boost through!
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fa-solid fa-mobile-screen" style="color: var(--lime);"></i> Can I play on mobile devices?
+                    </div>
+                    <div class="faq-answer">
+                        Yes! All 3D tracks and Arcade games feature responsive on-screen touch pedals (Left, Right, Nitro, Brake, Boost) and fluid touch dragging.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i class="fa-solid fa-wrench" style="color: #ffd700;"></i> Where do I upgrade my spacecraft?
+                    </div>
+                    <div class="faq-answer">
+                        Head to <strong>The Hangar</strong> (`/hangar/`) to upgrade Top Speed, Acceleration, Handling Grip, Deflector Shields, and Nitro up to Mk V, plus customize your paint livery!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

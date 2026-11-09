@@ -11,8 +11,9 @@ from django.db.models import Min, Q
 from .models import (
     UserProfile, Vehicle, UserVehicle, Track,
     RaceResult, Achievement, UserAchievement,
-    ArcadeGame, ArcadeScore
+    ArcadeGame, ArcadeScore, ContactMessage, ChatInteraction
 )
+from .chatbot_service import CosmicChatbotService
 from .context_processors import get_or_create_profile
 
 
@@ -711,4 +712,108 @@ def api_arcade_score(request):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def contact_view(request):
+    """Contact & Suggestions Portal with FAQ and suggestion submission."""
+    profile = get_or_create_profile(request)
+    submitted = False
+    ref_id = None
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip() or profile.display_name
+        email = request.POST.get('email', '').strip()
+        category = request.POST.get('category', 'suggestion').strip()
+        subject = request.POST.get('subject', '').strip() or 'Cosmic In-Game Suggestion'
+        message_text = request.POST.get('message', '').strip()
+
+        if message_text:
+            obj = ContactMessage.objects.create(
+                profile=profile,
+                name=name,
+                email=email,
+                category=category,
+                subject=subject,
+                message=message_text,
+                source='web_form'
+            )
+            submitted = True
+            ref_id = obj.id
+            messages.success(request, f"Your {obj.get_category_display().lower()} (Ref #{obj.id}) has been successfully submitted to Avi Games World!")
+
+    context = {
+        'profile': profile,
+        'submitted': submitted,
+        'ref_id': ref_id,
+        'categories': ContactMessage.CATEGORY_CHOICES,
+    }
+    return render(request, 'game/contact.html', context)
+
+
+@require_POST
+def api_chatbot_message(request):
+    """AI Help Chatbot API endpoint answering queries and recording interactions/suggestions."""
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+        session_id = data.get('session_id', '').strip() or request.session.session_key or 'guest_session'
+        pilot_name = data.get('name', '').strip()
+        pilot_email = data.get('email', '').strip()
+
+        if not user_message:
+            return JsonResponse({'success': False, 'error': 'Message cannot be empty.'}, status=400)
+
+        profile = get_or_create_profile(request)
+        result = CosmicChatbotService.process_message(
+            user_text=user_message,
+            session_id=session_id,
+            profile=profile,
+            name=pilot_name,
+            email=pilot_email
+        )
+
+        return JsonResponse({
+            'success': True,
+            'reply': result['reply'],
+            'intent': result['intent'],
+            'suggestion_saved': result['suggestion_saved'],
+            'suggestion_id': result['suggestion_id']
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_POST
+def api_submit_contact(request):
+    """AJAX Contact & Suggestion submission API."""
+    try:
+        data = json.loads(request.body)
+        message_text = data.get('message', '').strip()
+        if not message_text:
+            return JsonResponse({'success': False, 'error': 'Message cannot be empty.'}, status=400)
+
+        profile = get_or_create_profile(request)
+        name = data.get('name', '').strip() or profile.display_name
+        email = data.get('email', '').strip()
+        category = data.get('category', 'suggestion').strip()
+        subject = data.get('subject', '').strip() or 'Cosmic Suggestion'
+
+        obj = ContactMessage.objects.create(
+            profile=profile,
+            name=name,
+            email=email,
+            category=category,
+            subject=subject,
+            message=message_text,
+            source='web_form'
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': f"Thank you! Your {obj.get_category_display().lower()} (Ref #{obj.id}) has been recorded.",
+            'ref_id': obj.id
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 

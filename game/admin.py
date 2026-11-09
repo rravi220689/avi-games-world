@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import UserProfile, Vehicle, UserVehicle, Track, RaceResult, Achievement, UserAchievement
+from .models import (
+    UserProfile, Vehicle, UserVehicle, Track, RaceResult,
+    Achievement, UserAchievement, ArcadeGame, ArcadeScore,
+    ContactMessage, ChatInteraction
+)
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -37,3 +41,29 @@ class AchievementAdmin(admin.ModelAdmin):
 @admin.register(UserAchievement)
 class UserAchievementAdmin(admin.ModelAdmin):
     list_display = ('profile', 'achievement', 'unlocked_at')
+
+@admin.register(ArcadeGame)
+class ArcadeGameAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'credit_multiplier', 'plays_count', 'created_at')
+    prepopulated_fields = {'slug': ('title',)}
+
+@admin.register(ArcadeScore)
+class ArcadeScoreAdmin(admin.ModelAdmin):
+    list_display = ('profile', 'game', 'score', 'credits_earned', 'xp_earned', 'created_at')
+    list_filter = ('game',)
+    ordering = ('-created_at',)
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'subject', 'source', 'is_resolved', 'created_at')
+    list_filter = ('category', 'source', 'is_resolved')
+    search_fields = ('name', 'email', 'subject', 'message')
+    list_editable = ('is_resolved',)
+    ordering = ('-created_at',)
+
+@admin.register(ChatInteraction)
+class ChatInteractionAdmin(admin.ModelAdmin):
+    list_display = ('session_id', 'profile', 'detected_intent', 'user_query', 'created_at')
+    list_filter = ('detected_intent',)
+    search_fields = ('user_query', 'bot_response', 'session_id')
+    ordering = ('-created_at',)

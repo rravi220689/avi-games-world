@@ -452,6 +452,10 @@
 <script src="{% static 'js/game_engine.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Hide chatbot and clutter when game starts
+        document.body.classList.add('in-game');
+        if (window.cosmicBot) window.cosmicBot.close();
+
         const raceConfig = JSON.parse('{{ race_config_json|escapejs }}');
         // Initialize Game Engine
         window.game = new SpaceRaceGame('game-canvas-container', raceConfig);

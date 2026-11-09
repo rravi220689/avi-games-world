@@ -1,6 +1,9 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from game.models import UserProfile, Vehicle, Track, RaceResult, UserVehicle, ArcadeGame, ArcadeScore
+from game.models import (
+    UserProfile, Vehicle, Track, RaceResult, UserVehicle,
+    ArcadeGame, ArcadeScore, ContactMessage, ChatInteraction
+)
 import json
 
 class SpaceRacingTests(TestCase):
@@ -128,3 +131,64 @@ class SpaceRacingTests(TestCase):
         res = self.client.get(reverse('home'))
         self.assertEqual(res.headers.get('X-Content-Type-Options'), 'nosniff')
         self.assertEqual(res.headers.get('X-Frame-Options'), 'DENY')
+
+    def test_contact_page_and_form_submission(self):
+        # 1. GET page
+        res = self.client.get(reverse('contact'))
+        self.assertEqual(res.status_code, 200)
+
+        # 2. POST suggestion
+        res = self.client.post(reverse('contact'), {
+            'name': 'Pilot Alpha',
+            'email': 'alpha@galaxy.net',
+            'category': 'suggestion',
+            'subject': 'Add Neon Moon Circuit',
+            'message': 'Please create a lunar track with low gravity loops!'
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(ContactMessage.objects.filter(subject='Add Neon Moon Circuit').exists())
+        saved_msg = ContactMessage.objects.get(subject='Add Neon Moon Circuit')
+        self.assertEqual(saved_msg.name, 'Pilot Alpha')
+        self.assertEqual(saved_msg.category, 'suggestion')
+
+    def test_chatbot_answering_and_database_persistence(self):
+        # 1. Ask site question about controls
+        payload = {
+            'message': 'How do I steer and use nitro in 3D racing?',
+            'session_id': 'test_session_123'
+        }
+        res = self.client.post(
+            reverse('api_chatbot_message'),
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data['success'])
+        self.assertIn('3D Space Car Racing Controls', data['reply'])
+        self.assertEqual(data['intent'], 'controls_racing')
+
+        # Verify chat logged in database
+        self.assertTrue(ChatInteraction.objects.filter(session_id='test_session_123').exists())
+
+        # 2. Send suggestion via chatbot
+        suggestion_payload = {
+            'message': 'My suggestion is to add custom neon horns and engine rev sounds',
+            'session_id': 'test_session_123'
+        }
+        res2 = self.client.post(
+            reverse('api_chatbot_message'),
+            data=json.dumps(suggestion_payload),
+            content_type='application/json'
+        )
+        self.assertEqual(res2.status_code, 200)
+        data2 = res2.json()
+        self.assertTrue(data2['success'])
+        self.assertTrue(data2['suggestion_saved'])
+
+        # Verify suggestion row exists in ContactMessage table
+        self.assertIsNotNone(data2['suggestion_id'])
+        contact_row = ContactMessage.objects.get(id=data2['suggestion_id'])
+        self.assertIn('custom neon horns', contact_row.message)
+        self.assertEqual(contact_row.source, 'chatbot')
+

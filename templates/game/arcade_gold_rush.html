@@ -169,6 +169,10 @@
 <script src="{% static 'js/gold_rush.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Hide chatbot and clutter when game starts
+        document.body.classList.add('in-game');
+        if (window.cosmicBot) window.cosmicBot.close();
+
         window.goldRush = new GoldRushGame('gold-canvas');
     });
 </script>

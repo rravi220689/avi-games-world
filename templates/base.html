@@ -39,6 +39,7 @@
             <li><a href="{% url 'hangar' %}" class="nav-link {% if request.resolver_match.url_name == 'hangar' %}active{% endif %}"><i class="fa-solid fa-wrench"></i> Hangar</a></li>
             <li><a href="{% url 'leaderboards' %}" class="nav-link {% if request.resolver_match.url_name == 'leaderboards' %}active{% endif %}"><i class="fa-solid fa-trophy"></i> Rankings</a></li>
             <li><a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><i class="fa-solid fa-id-card"></i> Dossier</a></li>
+            <li><a href="{% url 'contact' %}" class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" style="color: var(--cyan);"><i class="fa-solid fa-satellite-dish"></i> Contact &amp; Ideas</a></li>
         </ul>
 
         <div class="nav-status">
@@ -88,11 +89,69 @@
 
     <!-- Global Footer -->
     <footer>
-        <p>&copy; 2026 Avi Games World | 3D Space Racing, Mario Gold Mining &amp; Arcade Universe</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; gap: 1rem; padding: 0 1rem;">
+            <p>&copy; 2026 Avi Games World | 3D Space Racing, Mario Gold Mining &amp; Arcade Universe</p>
+            <div style="display: flex; gap: 1.5rem;">
+                <a href="{% url 'contact' %}" style="color: var(--cyan); text-decoration: none; font-size: 0.9rem;"><i class="fa-solid fa-paper-plane"></i> Contact &amp; Ideas</a>
+                <a href="javascript:void(0)" onclick="window.cosmicBot &amp;&amp; window.cosmicBot.open();" style="color: var(--amber); text-decoration: none; font-size: 0.9rem;"><i class="fa-solid fa-robot"></i> AI Helpdesk</a>
+            </div>
+        </div>
     </footer>
+
+    <!-- Floating AI Help Chatbot Widget (Auto-hidden in active game sessions) -->
+    <div id="cosmic-chatbot-launcher" class="chatbot-launcher-btn" title="Avi AI Help Guide &amp; Suggestions">
+        <div class="chatbot-launcher-icon">
+            <i class="fa-solid fa-robot"></i>
+        </div>
+        <span class="chatbot-launcher-badge">AI GUIDE</span>
+    </div>
+
+    <div id="cosmic-chatbot-container" class="chatbot-window">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <div class="chatbot-title">AVI COSMIC AI GUIDE</div>
+                    <div class="chatbot-status"><span class="status-dot"></span> ONLINE • READY TO HELP</div>
+                </div>
+            </div>
+            <div class="chatbot-header-actions">
+                <button id="chatbot-close-btn" class="chatbot-icon-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <!-- Quick Question Prompt Chips -->
+        <div class="chatbot-chips">
+            <button class="chip-btn" data-query="How to play 3D Space Racing controls?">🏎️ Racing Controls</button>
+            <button class="chip-btn" data-query="What are track hurdles and difficulty modes?">⚡ Hurdles &amp; Hard Mode</button>
+            <button class="chip-btn" data-query="How does Super Cosmic Gold Rush work?">🪙 Mario Gold Rush</button>
+            <button class="chip-btn" data-query="How to upgrade cars in the Hangar?">🛸 Car Tuning</button>
+            <button class="chip-btn" data-query="How to earn Cosmic Credits?">💰 Earn Credits</button>
+            <button class="chip-btn" data-query="My suggestion is to add ">💡 Submit Suggestion</button>
+        </div>
+
+        <!-- Messages Body -->
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="chat-msg bot-msg">
+                <div class="msg-bubble">
+                    👋 Greetings Pilot! I am the <strong>Avi Games World AI Assistant</strong>.<br><br>
+                    Ask me anything about racing controls, track hurdles, spaceship upgrades, Mario Gold Rush, or send your ideas &amp; suggestions directly into our database!
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot Input Area -->
+        <form id="chatbot-form" class="chatbot-input-area">
+            <input type="text" id="chatbot-input" placeholder="Ask a question or suggest an idea..." autocomplete="off">
+            <button type="submit" id="chatbot-send-btn" class="chatbot-send-btn" title="Send Transmission">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
 
     <!-- Web Audio Engine Script -->
     <script src="{% static 'js/audio_synth.js' %}"></script>
+    <script src="{% static 'js/chatbot.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const soundBtn = document.getElementById('global-sound-btn');

@@ -161,6 +161,10 @@
 <script src="{% static 'js/quantum_puzzle.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Hide chatbot and clutter when game starts
+        document.body.classList.add('in-game');
+        if (window.cosmicBot) window.cosmicBot.close();
+
         window.quantumPuzzle = new QuantumPuzzleGame('puzzle-canvas');
     });
 </script>

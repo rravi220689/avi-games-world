@@ -271,3 +271,51 @@ class ArcadeScore(models.Model):
 
     def __str__(self):
         return f"{self.profile.display_name} - {self.game.title}: {self.score} pts"
+
+
+class ContactMessage(models.Model):
+    CATEGORY_CHOICES = [
+        ('suggestion', 'Game Suggestion / Idea'),
+        ('feedback', 'General Feedback'),
+        ('bug_report', 'Bug / Glitch Report'),
+        ('feature_request', 'New Feature Request'),
+        ('contact', 'Direct Contact / Inquiry'),
+    ]
+
+    SOURCE_CHOICES = [
+        ('web_form', 'Contact Page Form'),
+        ('chatbot', 'AI Help Chatbot'),
+    ]
+
+    profile = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='contact_messages')
+    name = models.CharField(max_length=120)
+    email = models.EmailField(blank=True, default='')
+    category = models.CharField(max_length=40, choices=CATEGORY_CHOICES, default='suggestion')
+    subject = models.CharField(max_length=200, default='General Inquiry')
+    message = models.TextField()
+    source = models.CharField(max_length=30, choices=SOURCE_CHOICES, default='web_form')
+    is_resolved = models.BooleanField(default=False)
+    admin_notes = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.get_category_display()}] {self.name}: {self.subject[:40]}"
+
+
+class ChatInteraction(models.Model):
+    session_id = models.CharField(max_length=100, db_index=True)
+    profile = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='chat_logs')
+    user_query = models.TextField()
+    bot_response = models.TextField()
+    detected_intent = models.CharField(max_length=60, default='general_query')
+    suggestion_saved = models.ForeignKey(ContactMessage, on_delete=models.SET_NULL, null=True, blank=True, related_name='chat_origin')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Chat [{self.session_id[:8]}]: {self.user_query[:35]}..."
