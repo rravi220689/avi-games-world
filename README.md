@@ -98,7 +98,42 @@ Active Branch: `dev`
 
 ---
 
-## 🚀 Quickstart
+## 🐳 Docker Deployment
+
+### 1. Run with Docker Compose (Recommended)
+Launch the entire application with one command:
+```bash
+docker compose up -d --build
+```
+Access the application at `http://localhost:8000`.
+
+### 2. Build & Run Standalone Container
+```bash
+# Build Docker image
+docker build -t avi-games-world .
+
+# Run container connected to remote PostgreSQL
+docker run -d \
+  --name avi-games-world \
+  -p 8000:8000 \
+  -e DB_NAME=space_car_racing_db \
+  -e DB_USER=appadmin \
+  -e DB_PASSWORD=AppPgStrong@2026 \
+  -e DB_HOST=160.191.14.69 \
+  -e DB_PORT=5433 \
+  -e SECRET_KEY="your-production-secret-key" \
+  avi-games-world
+```
+
+The container automatically:
+- Connects to PostgreSQL and applies migrations (`python manage.py migrate`)
+- Collects and compresses static assets (`python manage.py collectstatic`)
+- Validates seed data (`python manage.py seed_data`)
+- Boots production Gunicorn WSGI workers with WhiteNoise asset delivery
+
+---
+
+## 🚀 Local Development Quickstart
 
 1. **Activate Virtualenv**:
    ```bash
