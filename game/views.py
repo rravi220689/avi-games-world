@@ -2,7 +2,7 @@ import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -750,6 +750,7 @@ def contact_view(request):
     return render(request, 'game/contact.html', context)
 
 
+@csrf_exempt
 @require_POST
 def api_chatbot_message(request):
     """AI Help Chatbot API endpoint answering queries and recording interactions/suggestions."""
@@ -783,6 +784,7 @@ def api_chatbot_message(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
+@csrf_exempt
 @require_POST
 def api_submit_contact(request):
     """AJAX Contact & Suggestion submission API."""
